@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #101010;
+    --bg-secondary: #1B1B1B;
+    --accent-yellow: #F5C518;
+    --accent-yellow-light: #FFDF40;
+    --accent-yellow-dark: #D4A710;
+    --text-white: #FFFFFF;
+    --border-dark: rgba(245, 197, 24, 0.15);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: initial; /* Lenis drives smooth scrolling */
+    background-color: #101010;
+    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    background-color: #101010;
+    color: #ffffff;
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #0c0c0c; }
+  ::-webkit-scrollbar-thumb { background: #F5C518; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #FFDF40; }
+
+  /* Selection */
+  ::selection { background: #F5C518; color: #101010; }
+}
+
+/* ─── HERO EDITORIAL BACKGROUND & LAYERING ──────────────────── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.hero-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── FONTS ─────────────────────────────────────────────────── */
+.font-syne { font-family: 'Syne', sans-serif; }
+.font-editorial { font-family: 'Playfair Display', serif; }
+.font-sans-custom { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* ─── LENIS ─────────────────────────────────────────────────── */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* ─── FILM GRAIN ────────────────────────────────────────────── */
+.grain-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ─── SCROLL PROGRESS ───────────────────────────────────────── */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #F5C518, #FFDF40, #F5C518);
+  box-shadow: 0 0 10px #F5C518;
+  z-index: 9997;
+  pointer-events: none;
+  transform-origin: left center;
+}
+
+/* ─── SPLIT TEXT ────────────────────────────────────────────── */
+.split-wrapper { overflow: hidden; display: block; }
+.split-word { overflow: hidden; display: inline-block; vertical-align: bottom; }
+.split-char { display: inline-block; }
+.split-line { overflow: hidden; display: block; }
+
+/* ─── 3D PERSPECTIVE UTILITIES ──────────────────────────────── */
+.perspective-600 { perspective: 600px; }
+.perspective-800 { perspective: 800px; }
+.perspective-1200 { perspective: 1200px; }
+.transform-3d { transform-style: preserve-3d; }
+
+/* ─── CLIP PATH UTILITIES ───────────────────────────────────── */
+.clip-inset-full { clip-path: inset(100% 0 0 0); }
+.clip-inset-none { clip-path: inset(0% 0 0 0); }
+
+/* ─── PARALLAX IMAGE WRAPPER ────────────────────────────────── */
+.parallax-wrap {
+  overflow: hidden;
+  position: relative;
+}
+.parallax-img {
+  width: 100%;
+  height: 112%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+/* ─── GLOW & ACCENTS ────────────────────────────────────────── */
+.glow-yellow-sm { box-shadow: 0 0 15px rgba(245, 197, 24, 0.2); }
+.glow-yellow { box-shadow: 0 0 30px rgba(245, 197, 24, 0.35); }
+.glow-yellow-text { text-shadow: 0 0 35px rgba(245, 197, 24, 0.45); }
+
+/* ─── NO SCROLLBAR ──────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── BACKGROUND GRID DOTS ──────────────────────────────────── */
+.bg-grid-dots {
+  background-image: radial-gradient(rgba(245, 197, 24, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ─── SCROLL INDICATOR LINE ─────────────────────────────────── */
+.scroll-line {
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, #F5C518);
+  animation: scrollLineAnim 2s ease-in-out infinite;
+}
+
+@keyframes scrollLineAnim {
+  0% { height: 0; opacity: 0; transform: translateY(0); }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { height: 50px; opacity: 0; transform: translateY(50px); }
+}
+
+/* ─── REDUCED MOTION ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
