@@ -45,9 +45,30 @@ export function getAllOrderedMenuFrames() {
   return getFrameSequenceForRange(1, MENU_FRAME_TOTAL);
 }
 
+const isCompactViewport = () =>
+  typeof window !== 'undefined' && window.innerWidth < 768;
+
+function setCachedFrameLRU(url, img) {
+  if (frameImageCache.has(url)) {
+    frameImageCache.delete(url);
+  }
+  frameImageCache.set(url, img);
+
+  // Cap decoded image memory strictly on mobile devices
+  const maxEntries = isCompactViewport() ? 72 : MENU_FRAME_TOTAL;
+  while (frameImageCache.size > maxEntries) {
+    const oldestKey = frameImageCache.keys().next().value;
+    if (!oldestKey) break;
+    frameImageCache.delete(oldestKey);
+  }
+}
+
 export function getCachedFrameImage(url) {
   const img = frameImageCache.get(url);
   if (img && img.complete && img.naturalWidth > 0) {
+    // Refresh recency cleanly on active draws
+    frameImageCache.delete(url);
+    frameImageCache.set(url, img);
     return img;
   }
   return null;
@@ -68,7 +89,7 @@ export function loadFrameImage(url) {
     img.decoding = 'async';
 
     const finalize = () => {
-      frameImageCache.set(url, img);
+      setCachedFrameLRU(url, img);
       inFlightFrameLoads.delete(url);
       resolve(img.naturalWidth > 0 ? img : null);
     };
@@ -94,17 +115,23 @@ export function loadFrameImage(url) {
 }
 
 /**
- * Lazy-preloads a single product/category sequence with bounded concurrency
- * and reports incremental progress without starving active frame draws.
+ * Lazy-preloads a single product/category sequence with adaptive concurrency
+ * and mobile memory capping without starving active frame draws.
  */
-export async function preloadFrameSequence(urls, { onProgress, signal, concurrency = 6 } = {}) {
+export async function preloadFrameSequence(urls, { onProgress, signal, concurrency } = {}) {
   const orderedUrls = sortFrameUrlsNumerically(urls);
-  const total = orderedUrls.length;
+  // On narrow mobile screens, preload alternate frames first to halve memory & network spike while preserving smooth playback
+  const targetUrls = isCompactViewport()
+    ? orderedUrls.filter((_, idx) => idx % 2 === 0 || idx === orderedUrls.length - 1)
+    : orderedUrls;
+
+  const total = targetUrls.length;
   if (total === 0) {
     onProgress?.(1, 1);
     return [];
   }
 
+  const effectiveConcurrency = concurrency ?? (isCompactViewport() ? 3 : 6);
   let completed = 0;
   let cursor = 0;
 
@@ -113,17 +140,17 @@ export async function preloadFrameSequence(urls, { onProgress, signal, concurren
   const visited = new Set();
   const keyStep = Math.max(1, Math.floor(total / 6));
   for (let i = 0; i < total; i += keyStep) {
-    priorityOrder.push(orderedUrls[i]);
+    priorityOrder.push(targetUrls[i]);
     visited.add(i);
   }
   for (let i = 0; i < total; i += 1) {
     if (!visited.has(i)) {
-      priorityOrder.push(orderedUrls[i]);
+      priorityOrder.push(targetUrls[i]);
     }
   }
 
   const results = new Array(total);
-  const urlIndexMap = new Map(orderedUrls.map((u, idx) => [u, idx]));
+  const urlIndexMap = new Map(targetUrls.map((u, idx) => [u, idx]));
 
   const worker = async () => {
     while (cursor < priorityOrder.length) {
@@ -139,7 +166,7 @@ export async function preloadFrameSequence(urls, { onProgress, signal, concurren
     }
   };
 
-  const workerCount = Math.min(concurrency, priorityOrder.length);
+  const workerCount = Math.min(effectiveConcurrency, priorityOrder.length);
   await Promise.all(Array.from({ length: workerCount }, () => worker()));
   return results;
 }

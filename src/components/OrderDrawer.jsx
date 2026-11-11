@@ -73,10 +73,10 @@ export const OrderDrawer = () => {
     <>
       {/* Toast notification floating bar */}
       {toastMessage && (
-        <div className="fixed top-24 right-6 z-50 animate-bounce duration-300">
-          <div className="bg-[#101010] border border-[#F5C518] text-[#FFFFFF] px-5 py-3 rounded-lg shadow-2xl flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-[#F5C518] animate-ping" />
-            <p className="text-sm font-medium tracking-wide">{toastMessage}</p>
+        <div className="fixed top-20 sm:top-24 left-4 right-4 sm:left-auto sm:right-6 z-50 animate-bounce duration-300">
+          <div className="bg-[#101010] border border-[#F5C518] text-[#FFFFFF] px-4 sm:px-5 py-3 rounded-lg shadow-2xl flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-[#F5C518] animate-ping shrink-0" />
+            <p className="text-xs sm:text-sm font-medium tracking-wide">{toastMessage}</p>
           </div>
         </div>
       )}

@@ -70,8 +70,8 @@ export const SpecialCollections = () => {
           </p>
         </div>
 
-        {/* 3 Collection Cards */}
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        {/* 3 Collection Cards: 1-col mobile, 2-col tablet, 3-col laptop/desktop */}
+        <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {SPECIAL_COLLECTIONS.map((col) => (
             <Link
               key={col.id}

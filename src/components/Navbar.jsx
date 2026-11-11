@@ -120,10 +120,10 @@ export const Navbar = () => {
             aria-label="BREW. Home"
           >
             <div className="flex flex-col">
-              <span className="font-syne font-black text-2xl sm:text-3xl tracking-[0.16em] text-white leading-none">
+              <span className="font-syne font-black text-xl min-[375px]:text-2xl sm:text-3xl tracking-[0.14em] sm:tracking-[0.16em] text-white leading-none">
                 BREW<span className="text-[#F5C518]">.</span>
               </span>
-              <span className="text-[7.5px] sm:text-[8px] font-mono uppercase tracking-[0.3em] text-[#F5C518]/90 mt-1 font-semibold">
+              <span className="text-[6.5px] min-[375px]:text-[7.5px] sm:text-[8px] font-mono uppercase tracking-[0.2em] min-[375px]:tracking-[0.28em] sm:tracking-[0.3em] text-[#F5C518]/90 mt-1 font-semibold whitespace-nowrap">
                 COFFEE • CRAFTED • CULTURE
               </span>
             </div>
