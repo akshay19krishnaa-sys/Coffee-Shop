@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowUpRight, ShoppingBag, Volume2 } from 'lucide-react';
+import { ArrowUpRight, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -67,26 +67,10 @@ export const Hero = () => {
   const ctaRef = useRef(null);
   const watermarkRef = useRef(null);
   const floatingElementsRef = useRef(null);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   const [bgSrc, setBgSrc] = useState(
     'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=90&w=2400&auto=format&fit=crop'
   );
-
-  // Sync audio state with ambient player
-  useEffect(() => {
-    const handleAudioState = (e) => {
-      if (e.detail?.isPlaying !== undefined) {
-        setIsAudioPlaying(e.detail.isPlaying);
-      }
-    };
-    window.addEventListener('ambient-audio-state', handleAudioState);
-    return () => window.removeEventListener('ambient-audio-state', handleAudioState);
-  }, []);
-
-  const toggleHeroAudio = () => {
-    window.dispatchEvent(new CustomEvent('toggle-ambient-audio'));
-  };
 
   // Interactive mouse parallax (desktop only)
   const handleMouseMove = useCallback((e) => {
@@ -312,22 +296,6 @@ export const Hero = () => {
       >
         <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" />
         <span>COFFEE. CRAFTED. CULTURE.</span>
-      </div>
-
-      {/* ── 6. HOZON EDITORIAL CORNER FRAMING (Bottom Right II / Audio Control) ── */}
-      <div className="absolute right-4 sm:right-6 lg:right-10 bottom-10 hidden sm:flex items-center gap-2.5 z-20">
-        <button
-          onClick={toggleHeroAudio}
-          className="group flex items-center justify-center w-11 h-11 rounded-full border border-white/30 bg-black/60 backdrop-blur-md text-white hover:border-[#F5C518] hover:text-[#F5C518] hover:shadow-[0_0_18px_rgba(245,197,24,0.4)] transition-all cursor-pointer"
-          title={isAudioPlaying ? 'Pause roastery ambient audio' : 'Play roastery ambient audio'}
-          aria-label="Toggle ambient roastery audio"
-        >
-          {isAudioPlaying ? (
-            <span className="font-mono text-xs font-bold tracking-widest text-[#F5C518]">II</span>
-          ) : (
-            <Volume2 className="w-4 h-4 text-white group-hover:text-[#F5C518] transition-colors" />
-          )}
-        </button>
       </div>
 
       {/* ── 7. MAIN OVERSIZED TYPOGRAPHY & HERO COMPOSITION ── */}

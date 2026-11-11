@@ -8,7 +8,6 @@ import { CartProvider } from './context/CartContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { OrderDrawer } from './components/OrderDrawer';
-import { AmbientAudio } from './components/AmbientAudio';
 import { ScrollProgress } from './components/ScrollProgress';
 import { HomePage } from './pages/HomePage';
 import { MenuPage } from './pages/MenuPage';
@@ -108,9 +107,6 @@ const AppShell = () => {
 
         {/* Slide-out Customizer & Order Bag Drawer */}
         <OrderDrawer />
-
-        {/* Roastery ambient audio synthesis toggle */}
-        <AmbientAudio />
       </div>
     </>
   );
