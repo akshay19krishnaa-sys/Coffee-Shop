@@ -110,27 +110,27 @@ const ChapterFilmSection = ({
         articleRef.current = el;
         if (typeof chapterRef === 'function') chapterRef(el);
       }}
-      className={`story-chapter relative z-[5] scroll-mt-20 md:scroll-mt-0 ${subtleToneBg} transition-colors duration-700`}
+      className={`story-chapter relative z-10 pointer-events-auto scroll-mt-20 md:scroll-mt-0 ${subtleToneBg} transition-colors duration-700`}
     >
-      {/* Mobile uses sticky theatre band + flex-col vertical spacing; desktop (>=768px) layout untouched */}
+      {/* Mobile uses z-0 background vessel + z-20 typography column; desktop (>=768px) layout untouched */}
       <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 pt-16 pb-14 sm:pt-20 sm:pb-20 md:pt-28 md:pb-28 lg:py-36">
-        <div className="flex flex-col gap-5 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
-          {/* Mobile-Only Sticky Interactive Vessel Theatre (defined h-[36dvh], scrim fades scrolled text cleanly) */}
-          <div className="md:hidden sticky top-[68px] z-20 w-full flex flex-col items-center pt-2 pb-5 bg-gradient-to-b from-[#101010] via-[#101010]/96 to-transparent">
-            <div ref={mobileCupStageRef} className="will-change-transform">
+        <div className="relative flex flex-col gap-5 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
+          {/* Mobile-Only Sticky Background Vessel Stage (strictly z-0 pointer-events-none behind typography) */}
+          <div
+            aria-hidden="true"
+            className="md:hidden sticky top-[72px] z-0 pointer-events-none w-full h-[38dvh] min-h-[210px] max-h-[320px] flex items-center justify-center"
+          >
+            <div ref={mobileCupStageRef} className="will-change-transform pointer-events-none">
               <ScrollCoffeeStage
                 frameNumberRef={mobileFrameRef}
                 fallbackFrame={chapter.startFrame}
-                interactive
                 className="w-[min(76vw,36dvh)] h-[min(76vw,36dvh)] min-h-[210px] max-w-[290px] max-h-[300px] mx-auto"
               />
             </div>
-            <span className="mt-1 text-[9px] font-mono uppercase tracking-[0.26em] text-white/35 pointer-events-none select-none">
-              Drag Vessel To Rotate 360°
-            </span>
           </div>
 
-          {/* BEAT 1: PRODUCT INTRODUCTION */}
+          <div className="relative z-20 pointer-events-auto">
+            {/* BEAT 1: PRODUCT INTRODUCTION */}
           <div className="beat-intro space-y-4 sm:space-y-6 pb-16 sm:pb-22 md:pb-28 lg:pb-32">
             <div className="reveal-line flex items-center gap-3 sm:gap-4">
               <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.32em] text-[#F5C518]">
@@ -321,6 +321,7 @@ const ChapterFilmSection = ({
                 </div>
               </div>
             )}
+          </div>
           </div>
         </div>
       </div>
@@ -730,10 +731,10 @@ export const MenuPage = () => {
       ref={pageRef}
       className="relative bg-[#101010] text-white overflow-x-clip pb-28 sm:pb-32 md:pb-0 selection:bg-[#F5C518] selection:text-[#101010]"
     >
-      {/* TABLET & DESKTOP (>=768px) FIXED CHOREOGRAPHED VESSEL STAGE (Strict md+ scope leaves desktop untouched & prevents mobile overlaps) */}
+      {/* TABLET & DESKTOP (>=768px) FIXED CHOREOGRAPHED VESSEL STAGE (z-0 pointer-events-none strictly behind typography) */}
       <div
         ref={stageOverlayRef}
-        className="hidden md:flex motion-reduce:hidden fixed inset-0 pointer-events-none z-[15] items-center justify-center"
+        className="hidden md:flex motion-reduce:hidden fixed inset-0 pointer-events-none z-0 items-center justify-center"
         aria-hidden="true"
       >
         <div ref={cupMoverRef} className="will-change-transform">
@@ -750,11 +751,11 @@ export const MenuPage = () => {
       {/* 1. INTRO SECTION (100dvh on mobile for accurate mobile address-bar viewport sizing) */}
       <section
         ref={introSectionRef}
-        className="relative z-20 min-h-[100dvh] md:min-h-[100svh] flex flex-col justify-between items-center text-center max-w-6xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-24 sm:pt-28 pb-24 sm:pb-28 md:pb-12"
+        className="relative z-10 min-h-[100dvh] md:min-h-[100svh] flex flex-col justify-between items-center text-center max-w-6xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-24 sm:pt-28 pb-24 sm:pb-28 md:pb-12"
       >
         <div
           ref={introTitleRef}
-          className="max-w-4xl mx-auto space-y-3 sm:space-y-4 pointer-events-none"
+          className="relative z-20 max-w-4xl mx-auto space-y-3 sm:space-y-4 pointer-events-auto"
         >
           <p className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] sm:tracking-[0.36em] text-[#F5C518]/90">
             COFFEE. CRAFTED. CULTURE.
@@ -768,31 +769,30 @@ export const MenuPage = () => {
           </h1>
         </div>
 
-        {/* Mobile (<768px) Interactive Opening Vessel (explicit height prevents 0-height collapse) */}
-        <div className="md:hidden my-auto py-4 w-full flex flex-col items-center">
-          <div ref={mobileIntroCupRef} className="will-change-transform">
+        {/* Mobile (<768px) Background Vessel Layer (strictly inset-0 z-0 pointer-events-none behind typography) */}
+        <div
+          aria-hidden="true"
+          className="md:hidden absolute inset-0 z-0 pointer-events-none flex items-center justify-center px-4"
+        >
+          <div ref={mobileIntroCupRef} className="will-change-transform pointer-events-none">
             <ScrollCoffeeStage
               frameNumberRef={mobileIntroFrameRef}
               fallbackFrame={1}
-              interactive
               className="w-[min(78vw,38dvh)] h-[min(78vw,38dvh)] min-h-[220px] max-w-[300px] max-h-[310px] mx-auto"
             />
           </div>
-          <span className="mt-1.5 text-[9px] font-mono uppercase tracking-[0.26em] text-white/35 pointer-events-none select-none">
-            Swipe Vessel Or Scroll To Pour
-          </span>
         </div>
 
         {/* Tablet/Desktop reduced-motion fallback static hero cup only */}
-        <div className="hidden md:motion-reduce:block my-auto py-4 w-full">
+        <div className="hidden md:motion-reduce:block relative z-0 pointer-events-none my-auto py-4 w-full">
           <ScrollCoffeeStage
             fallbackFrame={1}
             className="md:max-w-[465px] mx-auto"
           />
         </div>
 
-        {/* Bottom quick jump chapter bar + subtle scroll whisper */}
-        <div className="w-full flex flex-col items-center gap-4 sm:gap-5 mt-auto">
+        {/* Bottom quick jump chapter bar + subtle scroll whisper (explicitly z-20 pointer-events-auto on top) */}
+        <div className="relative z-20 pointer-events-auto w-full flex flex-col items-center gap-4 sm:gap-5 mt-auto">
           <nav
             aria-label="Jump to coffee chapter"
             className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-1 max-w-full"
@@ -820,7 +820,7 @@ export const MenuPage = () => {
       </section>
 
       {/* 2..5. CONTINUOUS COFFEE STORYTELLING CHAPTERS */}
-      <section aria-label="Coffee Menu Film Chapters" className="relative">
+      <section aria-label="Coffee Menu Film Chapters" className="relative z-10 pointer-events-auto">
         {FILM_CHAPTERS.map((chapter, idx) => (
           <ChapterFilmSection
             key={chapter.categoryId}
@@ -843,7 +843,7 @@ export const MenuPage = () => {
       {/* QUIET EPILOGUE SECTION (extra bottom spacing below CTA keeps floating mobile bag pill clear) */}
       <section
         ref={epilogueRef}
-        className="relative z-20 max-w-5xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-16 pb-28 sm:pt-24 sm:pb-32 md:py-28 lg:py-32 text-center border-t border-white/[0.08]"
+        className="relative z-20 pointer-events-auto max-w-5xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-16 pb-28 sm:pt-24 sm:pb-32 md:py-28 lg:py-32 text-center border-t border-white/[0.08]"
       >
         <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.32em] text-[#F5C518] mb-3 sm:mb-4">
           Brewed Fresh To Order
