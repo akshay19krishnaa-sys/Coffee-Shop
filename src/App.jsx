@@ -14,6 +14,7 @@ import { HomePage } from './pages/HomePage';
 import { MenuPage } from './pages/MenuPage';
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /**
  * Handles scroll restoration, hash scrolling (/#contact), and GSAP ScrollTrigger

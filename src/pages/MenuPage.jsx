@@ -29,61 +29,35 @@ const ChapterFilmSection = ({
   isJustAdded,
   justAddedCompanionId,
 }) => {
-  const mobileStageTriggerRef = useRef(null);
-  const mobileFrameRef = useRef(chapter.startFrame);
-
   const { product, companions } = chapter;
   const activeSize = product.sizes?.[selectedSizeIndex] || product.sizes?.[0];
   const displayPrice = activeSize?.price ?? product.price;
 
-  // Mobile & Small Tablet (<768px) vertical scroll scrubbing per chapter
-  useEffect(() => {
-    const el = mobileStageTriggerRef.current;
-    if (!el) return undefined;
-
-    const mm = gsap.matchMedia();
-    mm.add('(max-width: 767px) and (prefers-reduced-motion: no-preference)', () => {
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 85%',
-        end: 'bottom 20%',
-        scrub: 0.65,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const span = chapter.endFrame - chapter.startFrame;
-          mobileFrameRef.current = chapter.startFrame + self.progress * span;
-        },
-      });
-    });
-
-    return () => mm.revert();
-  }, [chapter.startFrame, chapter.endFrame]);
-
   const subtleToneBg =
-    chapterIndex % 2 === 1 ? 'bg-[#141414]/70' : 'bg-transparent';
+    chapterIndex % 2 === 1
+      ? 'bg-gradient-to-b from-transparent via-[#151515]/55 to-transparent'
+      : 'bg-transparent';
 
   return (
     <article
       id={`chapter-${chapter.categoryId}`}
       ref={chapterRef}
-      className={`story-chapter relative z-20 ${subtleToneBg} transition-colors duration-700`}
+      className={`story-chapter relative z-[5] ${subtleToneBg} transition-colors duration-700`}
     >
-      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 py-14 min-[375px]:py-16 sm:py-24 md:py-28 lg:py-36">
-        {/* Right-aligned editorial storytelling column on >=768px; centered single column below */}
+      {/* On mobile (<768px), pt-[34vh] clears the upper floating vessel showcase zone so text reveals cleanly underneath */}
+      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 pt-[35vh] pb-14 min-[375px]:pb-16 sm:pb-20 md:pt-28 md:pb-28 lg:py-36">
+        {/* Right column on tablet/desktop (>=768px); centered single column below cup on mobile */}
         <div className="md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
-          {/* Mobile & Small Tablet (<768px) Centered Touch-Ready Vessel Stage */}
-          <div ref={mobileStageTriggerRef} className="md:hidden mb-8 sm:mb-10">
+          {/* Accessible fallback static cup shown ONLY when user explicitly enables prefers-reduced-motion */}
+          <div className="hidden motion-reduce:block mb-8">
             <ScrollCoffeeStage
-              frameNumberRef={mobileFrameRef}
               fallbackFrame={chapter.startFrame}
-              frameRange={{ start: chapter.startFrame, end: chapter.endFrame }}
-              enableTouchScrub
-              className="w-[74vw] max-w-[250px] min-[375px]:max-w-[300px] sm:max-w-[360px] max-h-[42vh] mx-auto"
+              className="w-[64vw] max-w-[265px] mx-auto md:hidden"
             />
           </div>
 
           {/* BEAT 1: PRODUCT INTRODUCTION */}
-          <div className="beat-intro space-y-4 sm:space-y-6 pb-12 sm:pb-20 md:pb-28 lg:pb-32">
+          <div className="beat-intro space-y-4 sm:space-y-6 pb-16 sm:pb-22 md:pb-28 lg:pb-32">
             <div className="reveal-line flex items-center gap-3 sm:gap-4">
               <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.32em] text-[#F5C518]">
                 {chapter.chapterNumber}
@@ -95,7 +69,7 @@ const ChapterFilmSection = ({
             </div>
 
             <div className="overflow-hidden">
-              <h2 className="reveal-title font-syne font-black uppercase tracking-tight leading-[0.92] text-[clamp(1.75rem,7.2vw,2.65rem)] md:text-[clamp(1.85rem,3.6vw,3.1rem)] lg:text-[clamp(2.35rem,4.2vw,4.35rem)] text-white break-words">
+              <h2 className="reveal-title font-syne font-black uppercase tracking-tight leading-[0.92] text-[clamp(1.85rem,7.6vw,2.7rem)] md:text-[clamp(1.85rem,3.6vw,3.1rem)] lg:text-[clamp(2.35rem,4.2vw,4.35rem)] text-white break-words">
                 {product.name}
               </h2>
             </div>
@@ -109,43 +83,42 @@ const ChapterFilmSection = ({
             </p>
           </div>
 
-          {/* Balanced 2-col layout ONLY on small tablet (576px-767px) for concise specs */}
-          <div className="sm:grid sm:grid-cols-2 sm:gap-8 md:block">
-            {/* BEAT 2: FLAVOUR EXPERIENCE */}
-            <div className="beat-flavour relative py-10 sm:py-12 md:py-24 border-t border-white/[0.08] space-y-6 sm:space-y-8">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="reveal-flavour text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.28em] text-[#F5C518]">
-                  Flavour Profile
-                </span>
-                <span className="reveal-flavour text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.2em] text-white/35">
-                  {product.elevation}
-                </span>
-              </div>
-
-              <div className="space-y-2.5 sm:space-y-3.5">
-                {product.flavourNotes.map((note, idx) => (
-                  <div key={note} className="reveal-flavour flex items-baseline gap-3 sm:gap-4">
-                    <span className="text-[10px] sm:text-[11px] font-mono text-[#F5C518]/75 tabular-nums">
-                      0{idx + 1}
-                    </span>
-                    <p className="font-editorial italic text-xl min-[375px]:text-2xl sm:text-2xl lg:text-4xl text-white/95 tracking-tight">
-                      {note}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-2 flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] text-white/40">
-                {product.ingredientsList.slice(0, 3).map((label) => (
-                  <span key={label} className="reveal-flavour">
-                    · {label}
-                  </span>
-                ))}
-              </div>
+          {/* BEAT 2: FLAVOUR EXPERIENCE */}
+          <div className="beat-flavour relative py-14 sm:py-20 md:py-24 border-t border-white/[0.08] space-y-6 sm:space-y-8">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="reveal-flavour text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.28em] text-[#F5C518]">
+                Flavour Profile
+              </span>
+              <span className="reveal-flavour text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.2em] text-white/35">
+                {product.elevation}
+              </span>
             </div>
 
-            {/* BEAT 3A (Mobile/Tablet Grouped): INGREDIENTS LIST */}
-            <div className="beat-order-ingredients pt-10 sm:pt-12 md:pt-20 pb-8 border-t border-white/[0.08] space-y-4">
+            <div className="space-y-2.5 sm:space-y-3.5">
+              {product.flavourNotes.map((note, idx) => (
+                <div key={note} className="reveal-flavour flex items-baseline gap-3 sm:gap-4">
+                  <span className="text-[10px] sm:text-[11px] font-mono text-[#F5C518]/75 tabular-nums">
+                    0{idx + 1}
+                  </span>
+                  <p className="font-editorial italic text-xl min-[375px]:text-2xl sm:text-3xl lg:text-4xl text-white/95 tracking-tight">
+                    {note}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] text-white/40">
+              {product.ingredientsList.slice(0, 3).map((label) => (
+                <span key={label} className="reveal-flavour">
+                  · {label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* BEAT 3: INGREDIENTS, SIZES, PRICE & ORDER ACTION */}
+          <div className="beat-order pt-14 sm:pt-18 md:pt-20 pb-6 border-t border-white/[0.08] space-y-8 sm:space-y-10">
+            <div className="beat-order-ingredients space-y-4">
               <span className="reveal-ingredient block text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.28em] text-white/45">
                 Crafted From
               </span>
@@ -163,11 +136,8 @@ const ChapterFilmSection = ({
                 ))}
               </ul>
             </div>
-          </div>
 
-          {/* BEAT 3B: SIZES, PRICE & TOUCH-FRIENDLY ORDER ACTION */}
-          <div className="beat-order pt-8 sm:pt-10 pb-4 border-t border-white/[0.08] space-y-7 sm:space-y-8">
-            <div className="reveal-purchase space-y-6">
+            <div className="reveal-purchase space-y-6 pt-6 border-t border-white/[0.08]">
               {product.sizes?.length > 0 && (
                 <div className="flex flex-wrap items-center gap-x-5 sm:gap-x-6 gap-y-2">
                   {product.sizes.map((sizeObj, idx) => {
@@ -206,7 +176,6 @@ const ChapterFilmSection = ({
                   </span>
                 </div>
 
-                {/* Touch-friendly full-width mobile Add To Cart */}
                 <div className="flex flex-col min-[375px]:flex-row items-stretch min-[375px]:items-center gap-3 min-[375px]:gap-5 w-full sm:w-auto">
                   <button
                     type="button"
@@ -296,12 +265,16 @@ export const MenuPage = () => {
   const pageRef = useRef(null);
   const introSectionRef = useRef(null);
   const introTitleRef = useRef(null);
-  const desktopStageOverlayRef = useRef(null);
-  const desktopCupMoverRef = useRef(null);
-  const desktopCupInnerRef = useRef(null);
+  const stageOverlayRef = useRef(null);
+  const cupMoverRef = useRef(null);
+  const cupInnerRef = useRef(null);
+  const mobileHorizonRef = useRef(null);
   const epilogueRef = useRef(null);
   const chapterRefs = useRef([]);
-  const desktopFrameRef = useRef(1);
+  const globalFrameRef = useRef(1);
+  const lastViewportWidthRef = useRef(
+    typeof window !== 'undefined' ? window.innerWidth : 0
+  );
   const addTimerRef = useRef(null);
   const companionTimerRef = useRef(null);
 
@@ -312,9 +285,11 @@ export const MenuPage = () => {
     chapterRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Initial lazy preload & deep-link support (?category=)
+  // Initial preload, ScrollTrigger image readiness refresh, & ?category= deep-linking
   useEffect(() => {
-    loadFrameImage(buildMenuFrameUrl(1));
+    loadFrameImage(buildMenuFrameUrl(1)).then(() => {
+      ScrollTrigger.refresh();
+    });
     if (FILM_CHAPTERS[0]) {
       preloadFrameSequence(FILM_CHAPTERS[0].frames);
     }
@@ -343,254 +318,323 @@ export const MenuPage = () => {
     };
   }, [searchParams]);
 
-  // Recalculate ScrollTrigger geometry cleanly on resize / orientation switch
+  // Refresh ScrollTrigger ONLY on real width or orientation changes (ignores mobile address bar height toggles)
   useEffect(() => {
     let timer = null;
-    const handleResize = () => {
+    const handleViewportChange = (isOrientation = false) => {
+      const currentW = window.innerWidth;
+      if (!isOrientation && currentW === lastViewportWidthRef.current) return;
+      lastViewportWidthRef.current = currentW;
+
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         ScrollTrigger.refresh();
-      }, 180);
+      }, 200);
     };
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
+
+    const onResize = () => handleViewportChange(false);
+    const onOrientation = () => handleViewportChange(true);
+
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('orientationchange', onOrientation, { passive: true });
     return () => {
       if (timer) clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onOrientation);
     };
   }, []);
 
-  // Responsive GSAP ScrollTrigger Choreography
+  // Unified Responsive GSAP ScrollTrigger Film Experience (Mobile AND Desktop with adapted transforms/positions)
   useEffect(() => {
     const mm = gsap.matchMedia();
 
-    // Shared lazy frame loading + responsive text storytelling distances
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const isCompact = window.innerWidth < 768;
+    mm.add(
+      {
+        isMobile: '(max-width: 767px) and (prefers-reduced-motion: no-preference)',
+        isTabletDesktop: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
+      },
+      (context) => {
+        const { isMobile } = context.conditions;
 
-      FILM_CHAPTERS.forEach((chapter, idx) => {
-        const chapterEl = chapterRefs.current[idx];
-        if (!chapterEl) return;
+        const mover = cupMoverRef.current;
+        const inner = cupInnerRef.current;
+        const overlay = stageOverlayRef.current;
+        const horizon = mobileHorizonRef.current;
+        const introEl = introSectionRef.current;
 
-        ScrollTrigger.create({
-          trigger: chapterEl,
-          start: isCompact ? 'top 125%' : 'top 150%',
-          once: true,
-          onEnter: () => {
-            preloadFrameSequence(chapter.frames);
-            // Only prefetch next chapter eagerly on tablet/desktop where memory budget allows
-            if (!isCompact && FILM_CHAPTERS[idx + 1]) {
-              preloadFrameSequence(FILM_CHAPTERS[idx + 1].frames);
-            }
-          },
+        // 1. Lazy preloading per chapter on both mobile and desktop
+        FILM_CHAPTERS.forEach((chapter, idx) => {
+          const chapterEl = chapterRefs.current[idx];
+          if (!chapterEl) return;
+
+          ScrollTrigger.create({
+            trigger: chapterEl,
+            start: isMobile ? 'top 135%' : 'top 150%',
+            once: true,
+            onEnter: () => {
+              preloadFrameSequence(chapter.frames);
+              if (FILM_CHAPTERS[idx + 1]) {
+                preloadFrameSequence(FILM_CHAPTERS[idx + 1].frames);
+              }
+            },
+          });
         });
-      });
 
-      if (introTitleRef.current) {
-        gsap.from(introTitleRef.current.children, {
-          y: isCompact ? 18 : 34,
-          opacity: 0,
-          stagger: isCompact ? 0.08 : 0.14,
-          duration: isCompact ? 0.65 : 1.0,
-          ease: 'power3.out',
-          clearProps: 'transform',
-        });
-      }
-
-      FILM_CHAPTERS.forEach((_, idx) => {
-        const chapterEl = chapterRefs.current[idx];
-        if (!chapterEl) return;
-
-        const titleEl = chapterEl.querySelector('.reveal-title');
-        const introLines = chapterEl.querySelectorAll('.reveal-line, .reveal-copy');
-        const flavourEls = chapterEl.querySelectorAll('.reveal-flavour');
-        const ingredientEls = chapterEl.querySelectorAll('.reveal-ingredient');
-        const purchaseEls = chapterEl.querySelectorAll('.reveal-purchase');
-
-        const dist = isCompact ? 14 : 26;
-        const dur = isCompact ? 0.55 : 0.85;
-
-        if (titleEl) {
-          gsap.from(titleEl, {
-            yPercent: isCompact ? 35 : 100,
-            opacity: isCompact ? 0 : 1,
-            duration: isCompact ? 0.6 : 0.95,
-            ease: 'power3.out',
-            clearProps: 'transform',
-            scrollTrigger: {
-              trigger: titleEl,
-              start: 'top 88%',
-              toggleActions: 'play none none reverse',
-            },
-          });
-        }
-
-        if (introLines.length > 0) {
-          gsap.from(introLines, {
-            y: dist,
+        // 2. Identical Cinematic Intro Heading Entrance
+        if (introTitleRef.current) {
+          gsap.from(introTitleRef.current.children, {
+            y: isMobile ? 24 : 34,
             opacity: 0,
-            stagger: isCompact ? 0.06 : 0.1,
-            duration: dur,
+            stagger: 0.12,
+            duration: isMobile ? 0.85 : 1.0,
             ease: 'power3.out',
             clearProps: 'transform',
-            scrollTrigger: {
-              trigger: introLines[0],
-              start: 'top 86%',
-              toggleActions: 'play none none reverse',
-            },
           });
         }
 
-        if (flavourEls.length > 0) {
-          gsap.from(flavourEls, {
-            y: dist,
-            opacity: 0,
-            stagger: isCompact ? 0.07 : 0.12,
-            duration: dur,
-            ease: 'power3.out',
-            clearProps: 'transform',
-            scrollTrigger: {
-              trigger: chapterEl.querySelector('.beat-flavour'),
-              start: 'top 85%',
-              toggleActions: 'play none none reverse',
-            },
-          });
-        }
+        // 3. Unified Continuous Floating Vessel Motion + Frame Scrubbing (Mobile & Desktop)
+        if (mover && inner && overlay && introEl) {
+          if (isMobile) {
+            gsap.set(mover, { x: 0, y: 24, scale: 0.96, opacity: 1 });
+            gsap.set(inner, { x: 0, rotation: 0, scale: 1 });
+            gsap.set(overlay, { opacity: 1, y: 0 });
+            if (horizon) gsap.set(horizon, { opacity: 0 });
 
-        if (ingredientEls.length > 0) {
-          gsap.from(ingredientEls, {
-            x: isCompact ? 0 : -16,
-            y: isCompact ? 10 : 0,
-            opacity: 0,
-            stagger: isCompact ? 0.05 : 0.09,
-            duration: isCompact ? 0.5 : 0.75,
-            ease: 'power3.out',
-            clearProps: 'transform',
-            scrollTrigger: {
-              trigger: chapterEl.querySelector('.beat-order-ingredients'),
-              start: 'top 86%',
-              toggleActions: 'play none none reverse',
-            },
-          });
-        }
-
-        if (purchaseEls.length > 0) {
-          gsap.from(purchaseEls, {
-            y: dist,
-            opacity: 0,
-            stagger: isCompact ? 0.06 : 0.1,
-            duration: dur,
-            ease: 'power3.out',
-            clearProps: 'transform',
-            scrollTrigger: {
-              trigger: purchaseEls[0],
-              start: 'top 90%',
-              toggleActions: 'play none none reverse',
-            },
-          });
-        }
-      });
-    });
-
-    // Tablet (>=768px), Laptop (992px+) & Desktop (1200px+) continuous floating vessel tracking
-    mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
-      const mover = desktopCupMoverRef.current;
-      const inner = desktopCupInnerRef.current;
-      const overlay = desktopStageOverlayRef.current;
-      const introEl = introSectionRef.current;
-
-      if (!mover || !inner || !overlay || !introEl) return undefined;
-
-      gsap.set(mover, { x: 0, y: 42, scale: 1.0, opacity: 1 });
-      gsap.set(inner, { rotation: 0 });
-      gsap.set(overlay, { opacity: 1, y: 0 });
-
-      // Smooth responsive horizontal glide LEFT based on current viewport band
-      gsap.to(mover, {
-        x: () => {
-          const vw = window.innerWidth;
-          if (vw < 992) return -Math.round(vw * 0.25); // Tablet 768..991
-          if (vw < 1200) return -Math.round(vw * 0.245); // Laptop 992..1199
-          return -Math.min(Math.round(vw * 0.235), 320); // Desktop 1200+
-        },
-        y: 0,
-        scale: () => (window.innerWidth < 992 ? 0.92 : 0.95),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: introEl,
-          start: 'top top',
-          end: 'bottom 20%',
-          scrub: 0.9,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      if (introTitleRef.current) {
-        gsap.to(introTitleRef.current, {
-          y: -50,
-          opacity: 0,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: introEl,
-            start: '12% top',
-            end: '75% top',
-            scrub: 0.8,
-          },
-        });
-      }
-
-      ScrollTrigger.create({
-        trigger: introEl,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 0.6,
-        onUpdate: (self) => {
-          desktopFrameRef.current = 1 + self.progress * 11;
-        },
-      });
-
-      FILM_CHAPTERS.forEach((chapter, idx) => {
-        const chapterEl = chapterRefs.current[idx];
-        if (!chapterEl) return;
-
-        const baseStart =
-          idx === 0 ? Math.max(12, chapter.startFrame) : chapter.startFrame;
-
-        ScrollTrigger.create({
-          trigger: chapterEl,
-          start: 'top 65%',
-          end: 'bottom 45%',
-          scrub: 0.75,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const p = self.progress;
-            desktopFrameRef.current = baseStart + p * (chapter.endFrame - baseStart);
-            const angle = Math.sin(p * Math.PI * 1.5) * 2.2;
-            gsap.set(inner, {
-              rotation: angle,
-              scale: 1 + Math.sin(p * Math.PI) * 0.03,
+            // Mobile Intro -> Chapter 01 glides smoothly up into dedicated showcase zone
+            gsap.to(mover, {
+              x: () => -Math.round(window.innerWidth * 0.03),
+              y: () => -Math.round(window.innerHeight * 0.215),
+              scale: () => (window.innerHeight < 700 ? 0.72 : 0.78),
+              ease: 'none',
+              scrollTrigger: {
+                trigger: introEl,
+                start: 'top top',
+                end: 'bottom 15%',
+                scrub: 0.75,
+                invalidateOnRefresh: true,
+              },
             });
-          },
-        });
-      });
 
-      if (epilogueRef.current) {
-        gsap.to(overlay, {
-          opacity: 0,
-          y: -55,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: epilogueRef.current,
-            start: 'top 92%',
-            end: 'top 42%',
-            scrub: 0.8,
-          },
+            if (horizon) {
+              gsap.to(horizon, {
+                opacity: 1,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: introEl,
+                  start: '45% top',
+                  end: '90% top',
+                  scrub: 0.6,
+                },
+              });
+            }
+          } else {
+            gsap.set(mover, { x: 0, y: 42, scale: 1.0, opacity: 1 });
+            gsap.set(inner, { x: 0, rotation: 0, scale: 1 });
+            gsap.set(overlay, { opacity: 1, y: 0 });
+
+            // Tablet / Laptop / Desktop Intro -> Chapter 01 glides smoothly LEFT
+            gsap.to(mover, {
+              x: () => {
+                const vw = window.innerWidth;
+                if (vw < 992) return -Math.round(vw * 0.25);
+                if (vw < 1200) return -Math.round(vw * 0.245);
+                return -Math.min(Math.round(vw * 0.235), 320);
+              },
+              y: 0,
+              scale: () => (window.innerWidth < 992 ? 0.92 : 0.95),
+              ease: 'none',
+              scrollTrigger: {
+                trigger: introEl,
+                start: 'top top',
+                end: 'bottom 20%',
+                scrub: 0.9,
+                invalidateOnRefresh: true,
+              },
+            });
+          }
+
+          if (introTitleRef.current) {
+            gsap.to(introTitleRef.current, {
+              y: isMobile ? -38 : -50,
+              opacity: 0,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: introEl,
+                start: '12% top',
+                end: '75% top',
+                scrub: 0.75,
+              },
+            });
+          }
+
+          // Intro subtle frame opening (1 -> 12) synced to scroll
+          ScrollTrigger.create({
+            trigger: introEl,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6,
+            onUpdate: (self) => {
+              globalFrameRef.current = 1 + self.progress * 11;
+            },
+          });
+
+          // Continuous Chapter-by-Chapter Horizontal/Vertical Sway + Scale + Rotation + Frame Scrubbing
+          FILM_CHAPTERS.forEach((chapter, idx) => {
+            const chapterEl = chapterRefs.current[idx];
+            if (!chapterEl) return;
+
+            const baseStart =
+              idx === 0 ? Math.max(12, chapter.startFrame) : chapter.startFrame;
+
+            ScrollTrigger.create({
+              trigger: chapterEl,
+              start: isMobile ? 'top 72%' : 'top 65%',
+              end: isMobile ? 'bottom 35%' : 'bottom 45%',
+              scrub: 0.75,
+              invalidateOnRefresh: true,
+              onUpdate: (self) => {
+                const p = self.progress;
+                globalFrameRef.current = baseStart + p * (chapter.endFrame - baseStart);
+
+                // Responsive organic X sway, tilt rotation, and breathing scale
+                const xShift = isMobile ? Math.sin(p * Math.PI * 2) * 16 : 0;
+                const angle = Math.sin(p * Math.PI * 1.5) * (isMobile ? 3.0 : 2.2);
+                const pulse = 1 + Math.sin(p * Math.PI) * (isMobile ? 0.065 : 0.032);
+
+                gsap.set(inner, {
+                  x: xShift,
+                  rotation: angle,
+                  scale: pulse,
+                });
+              },
+            });
+          });
+
+          // Outro Epilogue fade out before Footer on both Mobile & Desktop
+          if (epilogueRef.current) {
+            gsap.to(overlay, {
+              opacity: 0,
+              y: isMobile ? -40 : -55,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: epilogueRef.current,
+                start: 'top 92%',
+                end: 'top 45%',
+                scrub: 0.75,
+              },
+            });
+
+            if (isMobile && horizon) {
+              gsap.to(horizon, {
+                opacity: 0,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: epilogueRef.current,
+                  start: 'top 85%',
+                  end: 'top 45%',
+                  scrub: 0.7,
+                },
+              });
+            }
+          }
+        }
+
+        // 4. Full Same Storytelling Text Reveals Across Mobile & Desktop
+        FILM_CHAPTERS.forEach((_, idx) => {
+          const chapterEl = chapterRefs.current[idx];
+          if (!chapterEl) return;
+
+          const titleEl = chapterEl.querySelector('.reveal-title');
+          const introLines = chapterEl.querySelectorAll('.reveal-line, .reveal-copy');
+          const flavourEls = chapterEl.querySelectorAll('.reveal-flavour');
+          const ingredientEls = chapterEl.querySelectorAll('.reveal-ingredient');
+          const purchaseEls = chapterEl.querySelectorAll('.reveal-purchase');
+
+          const dist = isMobile ? 22 : 28;
+          const dur = isMobile ? 0.75 : 0.85;
+
+          if (titleEl) {
+            gsap.from(titleEl, {
+              yPercent: 100,
+              duration: isMobile ? 0.85 : 0.95,
+              ease: 'power4.out',
+              clearProps: 'transform',
+              scrollTrigger: {
+                trigger: titleEl,
+                start: isMobile ? 'top 92%' : 'top 86%',
+                toggleActions: 'play none none reverse',
+              },
+            });
+          }
+
+          if (introLines.length > 0) {
+            gsap.from(introLines, {
+              y: dist,
+              opacity: 0,
+              stagger: 0.1,
+              duration: dur,
+              ease: 'power3.out',
+              clearProps: 'transform',
+              scrollTrigger: {
+                trigger: introLines[0],
+                start: isMobile ? 'top 90%' : 'top 85%',
+                toggleActions: 'play none none reverse',
+              },
+            });
+          }
+
+          if (flavourEls.length > 0) {
+            gsap.from(flavourEls, {
+              y: dist,
+              opacity: 0,
+              stagger: 0.12,
+              duration: dur,
+              ease: 'power3.out',
+              clearProps: 'transform',
+              scrollTrigger: {
+                trigger: chapterEl.querySelector('.beat-flavour'),
+                start: isMobile ? 'top 90%' : 'top 84%',
+                toggleActions: 'play none none reverse',
+              },
+            });
+          }
+
+          if (ingredientEls.length > 0) {
+            gsap.from(ingredientEls, {
+              x: isMobile ? -12 : -16,
+              opacity: 0,
+              stagger: 0.09,
+              duration: isMobile ? 0.65 : 0.75,
+              ease: 'power3.out',
+              clearProps: 'transform',
+              scrollTrigger: {
+                trigger: chapterEl.querySelector('.beat-order-ingredients'),
+                start: isMobile ? 'top 90%' : 'top 85%',
+                toggleActions: 'play none none reverse',
+              },
+            });
+          }
+
+          if (purchaseEls.length > 0) {
+            gsap.from(purchaseEls, {
+              y: dist,
+              opacity: 0,
+              stagger: 0.1,
+              duration: dur,
+              ease: 'power3.out',
+              clearProps: 'transform',
+              scrollTrigger: {
+                trigger: purchaseEls[0],
+                start: isMobile ? 'top 92%' : 'top 88%',
+                toggleActions: 'play none none reverse',
+              },
+            });
+          }
         });
+
+        return undefined;
       }
-
-      return undefined;
-    });
+    );
 
     return () => mm.revert();
   }, []);
@@ -622,18 +666,25 @@ export const MenuPage = () => {
       ref={pageRef}
       className="relative bg-[#101010] text-white overflow-x-clip selection:bg-[#F5C518] selection:text-[#101010]"
     >
-      {/* TABLET/LAPTOP/DESKTOP FIXED CHOREOGRAPHED CUP LAYER (>=768px) */}
+      {/* MOBILE TOP HORIZON SCRIM: keeps upper floating vessel clear of scrolled-past copy below 768px */}
       <div
-        ref={desktopStageOverlayRef}
-        className="hidden md:flex fixed inset-0 pointer-events-none z-10 items-center justify-center"
+        ref={mobileHorizonRef}
+        className="md:hidden motion-reduce:hidden fixed top-0 inset-x-0 h-[39vh] bg-gradient-to-b from-[#101010] via-[#101010]/94 to-transparent pointer-events-none z-[12]"
+        aria-hidden="true"
+      />
+
+      {/* UNIFIED SCROLL-CHOREOGRAPHED VESSEL STAGE (Runs across Mobile, Tablet, Laptop & Desktop) */}
+      <div
+        ref={stageOverlayRef}
+        className="motion-reduce:hidden flex fixed inset-0 pointer-events-none z-[15] items-center justify-center"
         aria-hidden="true"
       >
-        <div ref={desktopCupMoverRef} className="will-change-transform">
-          <div ref={desktopCupInnerRef} className="will-change-transform">
+        <div ref={cupMoverRef} className="will-change-transform">
+          <div ref={cupInnerRef} className="will-change-transform">
             <ScrollCoffeeStage
-              frameNumberRef={desktopFrameRef}
+              frameNumberRef={globalFrameRef}
               fallbackFrame={1}
-              className="w-[35vw] max-w-[290px] lg:w-[38vw] lg:max-w-[440px] xl:w-[40vw] xl:max-w-[540px]"
+              className="w-[68vw] max-w-[280px] min-[390px]:max-w-[300px] sm:max-w-[345px] md:w-[37vw] md:max-w-[310px] lg:w-[40vw] lg:max-w-[465px] xl:w-[42vw] xl:max-w-[565px]"
             />
           </div>
         </div>
@@ -642,9 +693,12 @@ export const MenuPage = () => {
       {/* 1. INTRO SECTION */}
       <section
         ref={introSectionRef}
-        className="relative z-30 min-h-[100svh] flex flex-col justify-between items-center text-center max-w-6xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-24 sm:pt-28 pb-8 sm:pb-10"
+        className="relative z-20 min-h-[100svh] flex flex-col justify-between items-center text-center max-w-6xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-24 sm:pt-28 pb-8 sm:pb-10"
       >
-        <div ref={introTitleRef} className="max-w-4xl mx-auto space-y-3 sm:space-y-4 pointer-events-none">
+        <div
+          ref={introTitleRef}
+          className="max-w-4xl mx-auto space-y-3 sm:space-y-4 pointer-events-none"
+        >
           <p className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.28em] sm:tracking-[0.36em] text-[#F5C518]/90">
             COFFEE. CRAFTED. CULTURE.
           </p>
@@ -657,16 +711,16 @@ export const MenuPage = () => {
           </h1>
         </div>
 
-        {/* Mobile & Small Tablet (<768px) Centered Opening Vessel */}
-        <div className="md:hidden my-auto py-3 w-full">
+        {/* Reduced-motion fallback static hero cup only */}
+        <div className="hidden motion-reduce:block my-auto py-4 w-full">
           <ScrollCoffeeStage
             fallbackFrame={1}
-            className="w-[72vw] max-w-[240px] min-[375px]:max-w-[295px] sm:max-w-[355px] max-h-[42vh] mx-auto"
+            className="w-[68vw] max-w-[295px] md:max-w-[465px] mx-auto"
           />
         </div>
 
-        {/* Compact Quick Chapter Index + Whisper Scroll Prompt (Accessible & zero overlap) */}
-        <div className="w-full flex flex-col items-center gap-4 sm:gap-5">
+        {/* Bottom quick jump chapter bar + subtle scroll whisper */}
+        <div className="w-full flex flex-col items-center gap-4 sm:gap-5 mt-auto">
           <nav
             aria-label="Jump to coffee chapter"
             className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-1 max-w-full"
@@ -676,7 +730,7 @@ export const MenuPage = () => {
                 key={chap.categoryId}
                 type="button"
                 onClick={() => scrollToChapter(chap.categoryId)}
-                className="min-h-[44px] px-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] sm:tracking-[0.22em] text-white/55 hover:text-[#F5C518] transition-colors cursor-pointer"
+                className="min-h-[44px] px-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] sm:tracking-[0.22em] text-white/60 hover:text-[#F5C518] transition-colors cursor-pointer"
               >
                 <span className="text-[#F5C518]/80 mr-1.5">{chap.chapterNumber}</span>
                 {chap.categoryLabel}

@@ -54,8 +54,8 @@ function setCachedFrameLRU(url, img) {
   }
   frameImageCache.set(url, img);
 
-  // Cap decoded image memory strictly on mobile devices
-  const maxEntries = isCompactViewport() ? 72 : MENU_FRAME_TOTAL;
+  // Cap decoded image memory safely on mobile devices (~2 full chapters cached for fast bidirectional scroll)
+  const maxEntries = isCompactViewport() ? 96 : MENU_FRAME_TOTAL;
   while (frameImageCache.size > maxEntries) {
     const oldestKey = frameImageCache.keys().next().value;
     if (!oldestKey) break;

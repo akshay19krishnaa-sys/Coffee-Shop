@@ -127,42 +127,50 @@ export const Hero = () => {
 
   useEffect(() => {
     const el = heroRef.current;
-    if (!el) return;
+    if (!el) return undefined;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    const mm = gsap.matchMedia();
 
-    const ctx = gsap.context(() => {
-      // 1. Initial entrance animations
-      gsap.fromTo(
-        imageRef.current,
-        { scale: isMobile ? 1.02 : 1.08, opacity: 0.85 },
-        { scale: 1.0, opacity: 1, duration: 1.5, ease: 'power3.out' }
-      );
+    mm.add(
+      {
+        isMobile: '(max-width: 767px) and (prefers-reduced-motion: no-preference)',
+        isDesktop: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
+      },
+      (context) => {
+        const { isMobile } = context.conditions;
 
-      gsap.fromTo(
-        watermarkRef.current,
-        { opacity: 0, scale: 0.94 },
-        { opacity: 0.08, scale: 1.0, duration: 1.6, ease: 'power2.out', delay: 0.2 }
-      );
+        // 1. Initial entrance animations
+        gsap.fromTo(
+          imageRef.current,
+          { scale: isMobile ? 1.04 : 1.08, opacity: 0.85 },
+          { scale: 1.0, opacity: 1, duration: 1.4, ease: 'power3.out' }
+        );
 
-      // 2. Scroll Parallax: background scales and floats, floating beans rotate outwards
-      if (!prefersReducedMotion && imageRef.current) {
-        gsap.to(imageRef.current, {
-          scale: isMobile ? 1.05 : 1.15,
-          yPercent: isMobile ? 6 : 14,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: isMobile ? 0.6 : 1.2,
-          },
-        });
+        gsap.fromTo(
+          watermarkRef.current,
+          { opacity: 0, scale: 0.94 },
+          { opacity: 0.08, scale: 1.0, duration: 1.5, ease: 'power2.out', delay: 0.2 }
+        );
+
+        // 2. Scroll Parallax on all screen sizes
+        if (imageRef.current) {
+          gsap.to(imageRef.current, {
+            scale: isMobile ? 1.08 : 1.15,
+            yPercent: isMobile ? 10 : 14,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 0.9,
+              invalidateOnRefresh: true,
+            },
+          });
+        }
 
         if (floatingElementsRef.current) {
           gsap.to(floatingElementsRef.current.children, {
-            yPercent: -35,
+            yPercent: isMobile ? -22 : -35,
             stagger: 0.05,
             ease: 'none',
             scrollTrigger: {
@@ -170,43 +178,44 @@ export const Hero = () => {
               start: 'top top',
               end: 'bottom top',
               scrub: 1.0,
+              invalidateOnRefresh: true,
             },
           });
         }
-      }
 
-      // 3. Typography & CTA elements reveal
-      const tl = gsap.timeline({ delay: 0.2, defaults: { ease: 'power3.out' } });
-      tl.from(headingRef.current, {
-        opacity: 0,
-        y: isMobile ? 35 : 55,
-        duration: 0.95,
-      })
-        .from(
-          descRef.current,
-          {
-            opacity: 0,
-            y: 22,
-            duration: 0.7,
-          },
-          '-=0.45'
-        )
-        .from(
-          ctaRef.current?.children,
-          {
-            opacity: 0,
-            y: 18,
-            stagger: 0.1,
-            duration: 0.55,
-          },
-          '-=0.35'
-        );
-    }, el);
+        // 3. Typography & CTA elements reveal
+        const tl = gsap.timeline({ delay: 0.15, defaults: { ease: 'power3.out' } });
+        tl.from(headingRef.current, {
+          opacity: 0,
+          y: isMobile ? 40 : 55,
+          duration: 0.95,
+        })
+          .from(
+            descRef.current,
+            {
+              opacity: 0,
+              y: 22,
+              duration: 0.7,
+            },
+            '-=0.45'
+          )
+          .from(
+            ctaRef.current?.children,
+            {
+              opacity: 0,
+              y: 18,
+              stagger: 0.1,
+              duration: 0.55,
+            },
+            '-=0.35'
+          );
+      }
+    );
 
     window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      ctx.revert();
+      mm.revert();
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [handleMouseMove]);
