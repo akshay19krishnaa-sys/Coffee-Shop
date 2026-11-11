@@ -1,7 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowUpRight, Compass, Volume2 } from 'lucide-react';
+import { ArrowUpRight, ShoppingBag, Volume2 } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,6 +59,7 @@ const CoffeeBean = ({ className = '', style = {} }) => (
 );
 
 export const Hero = () => {
+  const { openDrawer } = useCart();
   const heroRef = useRef(null);
   const imageRef = useRef(null);
   const headingRef = useRef(null);
@@ -322,7 +325,7 @@ export const Hero = () => {
       <div className="hero-content relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center text-center my-auto py-6 sm:py-10">
         <h1
           ref={headingRef}
-          className="font-syne font-black text-[clamp(2.4rem,8.2vw,8.2rem)] tracking-tight uppercase leading-[0.92] text-white select-none drop-shadow-[0_4px_35px_rgba(0,0,0,0.95)] mb-6 max-w-full"
+          className="font-syne font-black text-[clamp(2rem,7.5vw,7.5rem)] tracking-tight uppercase leading-[0.92] text-white select-none drop-shadow-[0_4px_35px_rgba(0,0,0,0.95)] mb-6 max-w-full"
         >
           WAKE UP TO{' '}
           <span className="text-[#F5C518] drop-shadow-[0_0_40px_rgba(245,197,24,0.65)] block sm:inline">
@@ -342,30 +345,31 @@ export const Hero = () => {
           ref={ctaRef}
           className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto px-2 sm:px-0"
         >
-          <a
-            href="#menu"
+          <Link
+            to="/menu"
             className="group min-h-[48px] px-8 py-3.5 bg-[#F5C518] text-[#101010] font-syne font-black text-xs uppercase tracking-widest rounded hover:bg-[#FFDF40] hover:shadow-[0_0_30px_rgba(245,197,24,0.7)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 cursor-pointer shadow-xl"
           >
             <span>EXPLORE MENU</span>
             <ArrowUpRight className="w-4 h-4 stroke-[2.5] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </a>
+          </Link>
 
-          <a
-            href="#story"
+          <button
+            type="button"
+            onClick={openDrawer}
             className="group min-h-[48px] px-8 py-3.5 bg-black/60 backdrop-blur-md border border-white/30 text-white font-syne font-bold text-xs uppercase tracking-widest rounded hover:border-[#F5C518] hover:text-[#F5C518] hover:bg-black/85 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
-            <span>OUR STORY</span>
-            <Compass className="w-4 h-4 group-hover:rotate-45 transition-transform duration-300" />
-          </a>
+            <span>ORDER ONLINE</span>
+            <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+          </button>
         </div>
       </div>
 
       {/* ── 8. MINIMAL SCROLL PROMPT (Bottom Center) ── */}
       <div className="relative z-10 flex flex-col items-center gap-1.5 text-white/70 hover:text-[#F5C518] transition-colors pb-1">
         <a
-          href="#story"
+          href="#featured"
           className="flex flex-col items-center gap-1.5 group cursor-pointer p-2"
-          aria-label="Scroll to discover our story"
+          aria-label="Scroll to discover featured coffees"
         >
           <span className="text-[9px] font-mono uppercase tracking-[0.3em] drop-shadow-md">
             SCROLL TO DISCOVER

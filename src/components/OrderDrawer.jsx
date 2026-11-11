@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle2, Sparkles, Coffee } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const OrderDrawer = () => {
+  const navigate = useNavigate();
   const {
     isDrawerOpen,
     closeDrawer,
@@ -289,9 +291,9 @@ export const OrderDrawer = () => {
                   type="button"
                   onClick={() => {
                     closeDrawer();
-                    document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
+                    navigate('/menu');
                   }}
-                  className="px-5 py-2.5 bg-[#F5C518] text-[#101010] text-xs font-syne font-bold uppercase tracking-wider rounded hover:bg-[#FFDF40] transition-colors cursor-pointer"
+                  className="min-h-[44px] px-6 py-2.5 bg-[#F5C518] text-[#101010] text-xs font-syne font-bold uppercase tracking-wider rounded hover:bg-[#FFDF40] transition-colors cursor-pointer"
                 >
                   Browse Menu
                 </button>

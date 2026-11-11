@@ -141,7 +141,7 @@ export const WhyChooseUs = () => {
     <section
       id="why-us"
       ref={sectionRef}
-      className="relative min-h-screen bg-[#101010] text-white py-28 overflow-hidden border-b border-[#F5C518]/12"
+      className="relative min-h-screen bg-[#101010] text-white py-20 sm:py-28 lg:py-32 overflow-hidden border-b border-[#F5C518]/12"
     >
       {/* Background dot grid */}
       <div className="absolute inset-0 bg-grid-dots opacity-30 pointer-events-none" />
@@ -149,17 +149,17 @@ export const WhyChooseUs = () => {
       {/* Yellow ambient glow */}
       <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-[#F5C518]/4 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Title */}
-        <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20 space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#181818] border border-[#F5C518]/30">
             <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" />
             <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#F5C518]">
-              OBSIDIAN BENCHMARKS
+              03 // WHY CHOOSE BREW.
             </span>
           </div>
 
-          <h2 className="font-syne font-black text-4xl sm:text-6xl md:text-7xl uppercase tracking-tight leading-[0.9]">
+          <h2 className="font-syne font-black text-[clamp(1.75rem,6.5vw,4.5rem)] uppercase tracking-tight leading-[0.92]">
             WHY THE CONNOISSEUR <span className="text-[#F5C518]">CHOOSES US</span>
           </h2>
 
@@ -169,7 +169,7 @@ export const WhyChooseUs = () => {
         </div>
 
         {/* ── 4 STATS CARDS WITH CLIP-PATH REVEAL & LARGE DECORATIVE NUMBERS ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-14 sm:mb-20">
           {CAFE_STATS.map((stat, idx) => (
             <div
               key={stat.label}

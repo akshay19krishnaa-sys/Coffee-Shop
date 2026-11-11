@@ -57,12 +57,15 @@ export const Testimonials = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#181818] border border-[#F5C518]/30">
             <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" />
             <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.2em] text-[#F5C518]">
-              06 // PALATE TESTIMONIALS
+              05 // DEMO CUSTOMER REVIEWS
             </span>
           </div>
           <h2 className="font-syne font-black text-3xl sm:text-5xl text-white uppercase tracking-tight">
             TESTED BY THE <span className="text-[#F5C518]">PALATE ELITE</span>
           </h2>
+          <p className="text-xs font-mono text-white/50 uppercase tracking-widest">
+            Representative Demo Reviews for Showcase
+          </p>
         </div>
 
         {/* Testimonial Card */}

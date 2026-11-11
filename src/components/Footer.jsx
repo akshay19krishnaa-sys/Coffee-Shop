@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUp, MapPin, Clock, Phone, Mail } from 'lucide-react';
 
 export const Footer = () => {
   const [localTime, setLocalTime] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const updateTime = () => {
@@ -27,8 +30,17 @@ export const Footer = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/#contact');
+    }
+  };
+
   return (
-    <footer id="contact" className="relative bg-[#0d0d0d] text-white pt-16 sm:pt-20 pb-12 overflow-hidden border-t border-[#F5C518]/15">
+    <footer id="footer-contact" className="relative bg-[#0d0d0d] text-white pt-16 sm:pt-20 pb-12 overflow-hidden border-t border-[#F5C518]/15">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Grid: Location, Hours, Contact, Brand */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 pb-12 sm:pb-16 border-b border-white/10">
@@ -152,11 +164,11 @@ export const Footer = () => {
           <p>© 2026 BREW. Specialty Coffee Roasters. All rights reserved.</p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <a href="#hero" className="hover:text-[#F5C518] transition-colors min-h-[44px] flex items-center">Home</a>
-            <a href="#story" className="hover:text-[#F5C518] transition-colors min-h-[44px] flex items-center">Our Story</a>
-            <a href="#menu" className="hover:text-[#F5C518] transition-colors min-h-[44px] flex items-center">Menu</a>
-            <a href="#contact" className="hover:text-[#F5C518] transition-colors min-h-[44px] flex items-center">Contact</a>
+            <Link to="/" onClick={scrollToTop} className="hover:text-[#F5C518] transition-colors min-h-[44px] flex items-center">Home</Link>
+            <Link to="/menu" className="hover:text-[#F5C518] transition-colors min-h-[44px] flex items-center">Menu</Link>
+            <a href="/#contact" onClick={handleContactClick} className="hover:text-[#F5C518] transition-colors min-h-[44px] flex items-center">Contact</a>
             <button
+              type="button"
               onClick={scrollToTop}
               className="min-h-[44px] flex items-center gap-1.5 text-white/80 hover:text-[#F5C518] transition-colors cursor-pointer"
             >

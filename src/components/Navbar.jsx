@@ -1,22 +1,31 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isContactInView, setIsContactInView] = useState(false);
+  const [openMenuRouteKey, setOpenMenuRouteKey] = useState(null);
   const { cartCount, openDrawer } = useCart();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Exactly the 4 simplified navigation items
+  const currentRouteKey = `${location.pathname}${location.hash}`;
+  const mobileMenuOpen = openMenuRouteKey === currentRouteKey;
+  const setMobileMenuOpen = (open) => {
+    setOpenMenuRouteKey(open ? currentRouteKey : null);
+  };
+
+  const isMenuPage = location.pathname === '/menu';
+
   const navLinks = [
-    { name: 'Home', href: '#hero', id: 'hero' },
-    { name: 'Our Story', href: '#story', id: 'story' },
-    { name: 'Menu', href: '#menu', id: 'menu' },
-    { name: 'Contact', href: '#contact', id: 'contact' },
+    { name: 'Home', type: 'route', path: '/' },
+    { name: 'Menu', type: 'route', path: '/menu' },
+    { name: 'Contact', type: 'hash', path: '/#contact', hash: 'contact' },
   ];
 
-  // Prevent background scrolling when mobile menu is open
+  // Lock background scroll when mobile drawer is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.documentElement.style.overflow = 'hidden';
@@ -35,52 +44,78 @@ export const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
 
-      // Scroll spy logic
-      const scrollPosition = window.scrollY + 250;
-
-      const heroEl = document.getElementById('hero');
-      const storyEl = document.getElementById('story') || document.getElementById('origin');
-      const menuEl = document.getElementById('menu');
-      const contactEl = document.getElementById('contact');
-
-      if (contactEl && scrollPosition >= contactEl.offsetTop - 100) {
-        setActiveSection('contact');
-      } else if (menuEl && scrollPosition >= menuEl.offsetTop - 100) {
-        setActiveSection('menu');
-      } else if (storyEl && scrollPosition >= storyEl.offsetTop - 100) {
-        setActiveSection('story');
-      } else if (heroEl) {
-        setActiveSection('hero');
+      if (location.pathname === '/') {
+        const contactEl = document.getElementById('contact');
+        if (contactEl) {
+          const rect = contactEl.getBoundingClientRect();
+          setIsContactInView(rect.top <= window.innerHeight * 0.45 && rect.bottom >= 0);
+        } else {
+          setIsContactInView(false);
+        }
+      } else {
+        setIsContactInView(false);
       }
     };
 
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
-  const handleNavClick = (e, href) => {
+  const handleLinkClick = (e, link) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+
+    if (link.type === 'hash') {
+      if (location.pathname === '/') {
+        const target = document.getElementById(link.hash);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        navigate('/#contact');
+      }
+      return;
     }
+
+    if (link.path === '/') {
+      if (location.pathname === '/') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        navigate('/');
+      }
+      return;
+    }
+
+    navigate(link.path);
+  };
+
+  const handleOrderOnline = () => {
+    setMobileMenuOpen(false);
+    openDrawer();
+  };
+
+  const isLinkActive = (link) => {
+    if (link.path === '/menu') return isMenuPage;
+    if (link.type === 'hash') return location.pathname === '/' && isContactInView;
+    if (link.path === '/') return location.pathname === '/' && !isContactInView;
+    return false;
   };
 
   return (
     <>
       <header
         className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
-          isScrolled
+          isScrolled || isMenuPage
             ? 'bg-[#101010]/95 backdrop-blur-md border-b border-white/10 py-3 shadow-2xl'
             : 'bg-transparent py-4 sm:py-5'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Left: BREW. Text Logo */}
-          <a
-            href="#hero"
-            onClick={(e) => handleNavClick(e, '#hero')}
+          <Link
+            to="/"
+            onClick={(e) => handleLinkClick(e, { type: 'route', path: '/' })}
             className="group flex items-center gap-3 select-none cursor-pointer py-1"
             aria-label="BREW. Home"
           >
@@ -92,26 +127,25 @@ export const Navbar = () => {
                 COFFEE • CRAFTED • CULTURE
               </span>
             </div>
-          </a>
+          </Link>
 
-          {/* Center: Desktop Navigation (Visible on laptop/desktop: lg:flex 1024px+) */}
-          <nav className="hidden lg:flex items-center gap-8 xl:gap-10">
+          {/* Center: Simplified Desktop Navigation (Home, Menu, Contact) */}
+          <nav className="hidden lg:flex items-center gap-8 xl:gap-10" aria-label="Main Navigation">
             {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
+              const active = isLinkActive(link);
               return (
                 <a
                   key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
+                  href={link.path}
+                  onClick={(e) => handleLinkClick(e, link)}
                   className={`relative text-xs font-mono uppercase tracking-[0.2em] transition-colors py-2 group cursor-pointer min-h-[44px] flex items-center ${
-                    isActive ? 'text-[#F5C518] font-bold' : 'text-white/75 hover:text-white'
+                    active ? 'text-[#F5C518] font-bold' : 'text-white/75 hover:text-white'
                   }`}
                 >
                   <span>{link.name}</span>
-                  {/* Subtle animated underline */}
                   <span
                     className={`absolute bottom-1 left-0 h-[2px] bg-[#F5C518] transition-all duration-300 ease-out ${
-                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                      active ? 'w-full' : 'w-0 group-hover:w-full'
                     }`}
                   />
                 </a>
@@ -121,8 +155,8 @@ export const Navbar = () => {
 
           {/* Right: Cart Button + Order Online CTA / Hamburger */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Functional Cart Button with minimum 44px touch target */}
             <button
+              type="button"
               onClick={openDrawer}
               aria-label="Open Order Bag"
               className="relative min-w-[44px] min-h-[44px] p-2.5 rounded-full bg-[#181818]/90 border border-white/15 hover:border-[#F5C518] text-white hover:text-[#F5C518] transition-all cursor-pointer flex items-center justify-center"
@@ -135,20 +169,23 @@ export const Navbar = () => {
               )}
             </button>
 
-            {/* Desktop Order Online Button (1024px+) */}
+            {/* Desktop Order Online Button */}
             <button
-              onClick={openDrawer}
+              type="button"
+              onClick={handleOrderOnline}
               className="hidden lg:inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded bg-[#F5C518] text-[#101010] font-syne font-black text-xs uppercase tracking-widest hover:bg-[#FFDF40] hover:shadow-[0_0_25px_rgba(245,197,24,0.45)] transition-all transform active:scale-95 cursor-pointer"
             >
               <span>ORDER ONLINE</span>
               <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
 
-            {/* Mobile & Tablet Hamburger Button (Visible on < 1024px with 44px touch target) */}
+            {/* Mobile & Tablet Hamburger Button (< 1024px) */}
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden relative min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg bg-[#181818]/80 border border-white/10 flex flex-col items-center justify-center gap-1.5 focus:outline-none cursor-pointer"
               aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+              aria-expanded={mobileMenuOpen}
             >
               <span
                 className={`block h-0.5 bg-white transition-all duration-300 ${
@@ -182,29 +219,32 @@ export const Navbar = () => {
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#F5C518]">
             NAVIGATION // BREW.
           </p>
-          <nav className="flex flex-col gap-1">
-            {navLinks.map((link, idx) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className="group flex items-center justify-between text-2xl sm:text-3xl font-syne font-black uppercase tracking-tight text-white/90 hover:text-[#F5C518] py-3.5 border-b border-white/10 transition-colors min-h-[48px]"
-              >
-                <span>{link.name}</span>
-                <span className="text-xs font-mono text-[#F5C518]/70 group-hover:text-[#F5C518]">
-                  0{idx + 1}
-                </span>
-              </a>
-            ))}
+          <nav className="flex flex-col gap-1" aria-label="Mobile Navigation">
+            {navLinks.map((link, idx) => {
+              const active = isLinkActive(link);
+              return (
+                <a
+                  key={link.name}
+                  href={link.path}
+                  onClick={(e) => handleLinkClick(e, link)}
+                  className={`group flex items-center justify-between text-2xl sm:text-3xl font-syne font-black uppercase tracking-tight py-3.5 border-b border-white/10 transition-colors min-h-[48px] ${
+                    active ? 'text-[#F5C518]' : 'text-white/90 hover:text-[#F5C518]'
+                  }`}
+                >
+                  <span>{link.name}</span>
+                  <span className="text-xs font-mono text-[#F5C518]/70 group-hover:text-[#F5C518]">
+                    0{idx + 1}
+                  </span>
+                </a>
+              );
+            })}
           </nav>
         </div>
 
         <div className="space-y-4 pt-6 border-t border-white/10">
           <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              openDrawer();
-            }}
+            type="button"
+            onClick={handleOrderOnline}
             className="w-full min-h-[48px] py-3.5 bg-[#F5C518] text-[#101010] font-syne font-black text-xs uppercase tracking-widest rounded flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             <span>ORDER ONLINE NOW</span>

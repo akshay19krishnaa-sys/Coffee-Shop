@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MapPin, Clock, Phone, Mail, ArrowUpRight } from 'lucide-react';
+import { MapPin, Clock, Phone, Mail, ArrowUpRight, Coffee } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -116,7 +117,7 @@ export const FinalCTA = () => {
             <div className="inline-flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" />
               <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#F5C518]">
-                07 // VISIT & ORDER
+                06 // VISIT &amp; ORDER ONLINE
               </span>
             </div>
 
@@ -172,7 +173,7 @@ export const FinalCTA = () => {
             </div>
 
             {/* Order Online CTA */}
-            <div className="pt-2 sm:pt-4">
+            <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={openDrawer}
@@ -181,6 +182,14 @@ export const FinalCTA = () => {
                 <span>ORDER ONLINE NOW</span>
                 <ArrowUpRight className="w-4 h-4 stroke-[2.5] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
+
+              <Link
+                to="/menu"
+                className="group w-full sm:w-auto min-h-[48px] px-8 py-3.5 bg-transparent border border-white/25 hover:border-[#F5C518] text-white hover:text-[#F5C518] font-syne font-bold text-xs uppercase tracking-widest rounded transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              >
+                <Coffee className="w-4 h-4" />
+                <span>EXPLORE MENU</span>
+              </Link>
             </div>
           </div>
         </div>

@@ -52,7 +52,7 @@ export const CafeExperience = () => {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" />
               <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#F5C518]">
-                05 // CAFE EXPERIENCE & GALLERY
+                04 // CAFE ATMOSPHERE & EXPERIENCE
               </span>
             </div>
             <h2 className="font-syne font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-[0.95]">
