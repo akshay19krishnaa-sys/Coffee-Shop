@@ -46,7 +46,7 @@ export const Testimonials = () => {
     <section
       id="testimonials"
       ref={sectionRef}
-      className="relative min-h-[70vh] flex items-center bg-[#101010] text-white py-16 sm:py-24 overflow-hidden border-b border-white/5"
+      className="relative bg-[#101010] text-white py-12 sm:py-16 lg:py-20 mt-0 mb-0 overflow-hidden border-b border-white/5"
     >
       {/* Background ambient lighting */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#F5C518]/5 rounded-full blur-[140px] pointer-events-none" />

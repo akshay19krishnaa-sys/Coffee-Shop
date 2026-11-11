@@ -44,10 +44,10 @@ const ChapterFilmSection = ({
       ref={chapterRef}
       className={`story-chapter product-section relative z-10 pointer-events-auto scroll-mt-20 md:scroll-mt-0 ${subtleToneBg} transition-colors duration-700`}
     >
-      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 py-16 sm:py-22 md:pt-28 md:pb-28 lg:py-36">
+      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="relative z-10 pointer-events-auto flex flex-col gap-5 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
           {/* BEAT 1: PRODUCT INTRODUCTION */}
-          <div className="beat-intro space-y-4 sm:space-y-6 pb-16 sm:pb-22 md:pb-28 lg:pb-32">
+          <div className="beat-intro space-y-4 sm:space-y-6 pb-10 sm:pb-14 md:pb-16 lg:pb-20">
             <div className="reveal-line flex items-center gap-3 sm:gap-4">
               <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.32em] text-[#F5C518]">
                 {chapter.chapterNumber}
@@ -74,7 +74,7 @@ const ChapterFilmSection = ({
           </div>
 
           {/* BEAT 2: FLAVOUR EXPERIENCE */}
-          <div className="beat-flavour relative py-14 sm:py-20 md:py-24 border-t border-white/[0.08] space-y-6 sm:space-y-8">
+          <div className="beat-flavour relative py-10 sm:py-12 md:py-14 border-t border-white/[0.08] space-y-6 sm:space-y-8">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="reveal-flavour text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.28em] text-[#F5C518]">
                 Flavour Profile
@@ -107,7 +107,7 @@ const ChapterFilmSection = ({
           </div>
 
           {/* BEAT 3: INGREDIENTS, SIZES, PRICE & ORDER ACTION */}
-          <div className="beat-order pt-14 sm:pt-18 md:pt-20 pb-24 sm:pb-28 md:pb-6 border-t border-white/[0.08] space-y-8 sm:space-y-10">
+          <div className="beat-order pt-10 sm:pt-12 md:pt-14 pb-6 sm:pb-8 md:pb-4 border-t border-white/[0.08] space-y-8 sm:space-y-10">
             <div className="beat-order-ingredients space-y-4">
               <span className="reveal-ingredient block text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.28em] text-white/45">
                 Crafted From
@@ -418,19 +418,20 @@ export const MenuPage = () => {
             transformPerspective: isMobile ? 850 : 950,
           });
 
-          const totalSections = document.querySelectorAll('.product-section');
+          const totalSections = Array.from(document.querySelectorAll('.product-section'));
           const sectionCount = Math.max(1, totalSections.length);
           const scrollRoot = document.getElementById('main-wrapper') || mainEl;
           const totalScrollDist = Math.max(1, scrollRoot.scrollHeight - window.innerHeight);
 
-          const firstChapterFrac = totalSections[0]
-            ? Math.max(0.08, Math.min(0.18, (totalSections[0].getBoundingClientRect().top + window.scrollY) / totalScrollDist))
-            : 0.13;
-          const epilogueFrac = epilogueRef.current
-            ? Math.max(0.84, Math.min(0.95, (epilogueRef.current.getBoundingClientRect().top + window.scrollY) / totalScrollDist))
-            : 0.94;
-          const chapterSpan = (epilogueFrac - firstChapterFrac) / sectionCount;
-          const fadeDur = Math.max(0.05, 1 - epilogueFrac);
+          const toScrollFraction = (el, fallback) => {
+            if (!el) return fallback;
+            const rectTop = el.getBoundingClientRect().top + window.scrollY;
+            return Math.max(0.02, Math.min(0.98, rectTop / totalScrollDist));
+          };
+
+          const firstChapterFrac = toScrollFraction(totalSections[0], 0.14);
+          const epilogueFrac = toScrollFraction(epilogueRef.current, 0.92);
+          const fadeDur = Math.max(0.04, 1 - epilogueFrac);
 
           const masterTl = gsap.timeline({
             defaults: { ease: 'none' },
@@ -499,8 +500,16 @@ export const MenuPage = () => {
               ];
 
           FILM_CHAPTERS.forEach((chapter, idx) => {
-            const segStart = firstChapterFrac + idx * chapterSpan;
-            const halfDur = chapterSpan * 0.5;
+            const chapterEl = chapterRefs.current[idx] || totalSections[idx];
+            const nextEl = chapterRefs.current[idx + 1] || totalSections[idx + 1] || epilogueRef.current;
+            const fallbackStart =
+              firstChapterFrac + (idx * (epilogueFrac - firstChapterFrac)) / sectionCount;
+            const fallbackEnd =
+              firstChapterFrac + ((idx + 1) * (epilogueFrac - firstChapterFrac)) / sectionCount;
+            const segStart = toScrollFraction(chapterEl, fallbackStart);
+            const segEnd = Math.max(segStart + 0.04, toScrollFraction(nextEl, fallbackEnd));
+            const segSpan = segEnd - segStart;
+            const halfDur = segSpan * 0.5;
             const targetEndFrame = chapter.endFrame;
             const pose = chapterTimelineCoords[idx % chapterTimelineCoords.length];
 
@@ -510,7 +519,7 @@ export const MenuPage = () => {
               {
                 frame: targetEndFrame,
                 ease: 'none',
-                duration: chapterSpan,
+                duration: segSpan,
                 onUpdate: () => {
                   globalFrameRef.current = frameState.frame;
                 },
@@ -721,7 +730,7 @@ export const MenuPage = () => {
   return (
     <div
       ref={pageRef}
-      className="relative bg-[#101010] text-white overflow-x-clip pb-28 sm:pb-32 md:pb-0 selection:bg-[#F5C518] selection:text-[#101010]"
+      className="relative bg-[#101010] text-white overflow-x-clip pb-0 selection:bg-[#F5C518] selection:text-[#101010]"
     >
       {/* SINGLE GLOBAL PERSISTENT VIEWPORT STAGE (ONLY ONE canvas across the entire Menu Page, fixed z-0 behind z-10/z-20 typography) */}
       <div
@@ -813,7 +822,7 @@ export const MenuPage = () => {
       {/* QUIET EPILOGUE SECTION (extra bottom spacing below CTA keeps floating mobile bag pill clear) */}
       <section
         ref={epilogueRef}
-        className="relative z-20 pointer-events-auto max-w-5xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-16 pb-28 sm:pt-24 sm:pb-32 md:py-28 lg:py-32 text-center border-t border-white/[0.08]"
+        className="relative z-20 pointer-events-auto max-w-5xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-12 pb-20 sm:pt-16 sm:pb-24 md:py-20 lg:py-24 my-0 text-center border-t border-white/[0.08]"
       >
         <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.32em] text-[#F5C518] mb-3 sm:mb-4">
           Brewed Fresh To Order

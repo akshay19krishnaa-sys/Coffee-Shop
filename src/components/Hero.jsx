@@ -376,9 +376,9 @@ export const Hero = () => {
       {/* ── 8. MINIMAL SCROLL PROMPT (Bottom Center) ── */}
       <div className="relative z-10 flex flex-col items-center gap-1.5 text-white/70 hover:text-[#F5C518] transition-colors pb-1">
         <a
-          href="#featured"
+          href="#collections"
           className="flex flex-col items-center gap-1.5 group cursor-pointer p-2"
-          aria-label="Scroll to discover featured coffees"
+          aria-label="Scroll to discover collections"
         >
           <span className="text-[9px] font-mono uppercase tracking-[0.3em] drop-shadow-md">
             SCROLL TO DISCOVER

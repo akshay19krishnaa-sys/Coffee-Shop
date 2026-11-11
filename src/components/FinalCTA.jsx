@@ -75,7 +75,7 @@ export const FinalCTA = () => {
     <section
       id="contact"
       ref={sectionRef}
-      className="relative min-h-screen bg-[#101010] text-white py-20 sm:py-28 lg:py-36 overflow-hidden border-b border-white/5"
+      className="relative bg-[#101010] text-white py-16 sm:py-20 lg:py-24 my-0 overflow-hidden border-b border-white/5"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Alternating Layout: Strong Interior Image on Left, Editorial Details on Right */}
