@@ -89,8 +89,11 @@ const AppShell = () => {
       {/* Top golden scroll progress bar */}
       <ScrollProgress />
 
-      {/* Main layout container with zero horizontal overflow (overflow-x-clip preserves sticky/ScrollTrigger on mobile) */}
-      <div className="min-h-screen w-full overflow-x-clip bg-[#101010] text-white flex flex-col selection:bg-[#F5C518] selection:text-[#101010]">
+      {/* Main layout container (#main-wrapper spans Navbar -> routes -> Footer; overflow-x-clip preserves sticky/ScrollTrigger) */}
+      <div
+        id="main-wrapper"
+        className="min-h-screen w-full overflow-x-clip bg-[#101010] text-white flex flex-col selection:bg-[#F5C518] selection:text-[#101010]"
+      >
         <Navbar />
 
         <main className="flex-1 w-full overflow-x-clip">

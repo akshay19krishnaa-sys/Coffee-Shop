@@ -42,7 +42,7 @@ const ChapterFilmSection = ({
     <article
       id={`chapter-${chapter.categoryId}`}
       ref={chapterRef}
-      className={`story-chapter relative z-10 pointer-events-auto scroll-mt-20 md:scroll-mt-0 ${subtleToneBg} transition-colors duration-700`}
+      className={`story-chapter product-section relative z-10 pointer-events-auto scroll-mt-20 md:scroll-mt-0 ${subtleToneBg} transition-colors duration-700`}
     >
       <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 py-16 sm:py-22 md:pt-28 md:pb-28 lg:py-36">
         <div className="relative z-10 pointer-events-auto flex flex-col gap-5 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
@@ -418,17 +418,31 @@ export const MenuPage = () => {
             transformPerspective: isMobile ? 850 : 950,
           });
 
+          const totalSections = document.querySelectorAll('.product-section');
+          const sectionCount = Math.max(1, totalSections.length);
+          const scrollRoot = document.getElementById('main-wrapper') || mainEl;
+          const totalScrollDist = Math.max(1, scrollRoot.scrollHeight - window.innerHeight);
+
+          const firstChapterFrac = totalSections[0]
+            ? Math.max(0.08, Math.min(0.18, (totalSections[0].getBoundingClientRect().top + window.scrollY) / totalScrollDist))
+            : 0.13;
+          const epilogueFrac = epilogueRef.current
+            ? Math.max(0.84, Math.min(0.95, (epilogueRef.current.getBoundingClientRect().top + window.scrollY) / totalScrollDist))
+            : 0.94;
+          const chapterSpan = (epilogueFrac - firstChapterFrac) / sectionCount;
+          const fadeDur = Math.max(0.05, 1 - epilogueFrac);
+
           const masterTl = gsap.timeline({
             scrollTrigger: {
-              trigger: mainEl,
+              trigger: '#main-wrapper',
               start: 'top top',
-              end: 'max',
-              scrub: 1,
+              end: () => 'bottom bottom',
+              scrub: 1.5,
               invalidateOnRefresh: true,
             },
           });
 
-          // Segment 0 -> 1: Intro -> Chapter 01 Entry (0 -> 0.12 of total document scroll)
+          // Segment 0 -> 1: Intro -> Chapter 01 Entry (0 -> firstChapterFrac)
           if (introTitleRef.current && introEl) {
             masterTl.to(
               introTitleRef.current,
@@ -436,7 +450,7 @@ export const MenuPage = () => {
                 y: isMobile ? -28 : -50,
                 opacity: isMobile ? 0.2 : 0,
                 ease: 'none',
-                duration: 0.09,
+                duration: firstChapterFrac * 0.8,
               },
               0.01
             );
@@ -451,7 +465,7 @@ export const MenuPage = () => {
                 scale: () => (isMobile ? 0.8 : window.innerWidth < 992 ? 0.92 : 0.95),
                 opacity: isMobile ? 0.42 : 1,
                 ease: 'power1.inOut',
-                duration: 0.12,
+                duration: firstChapterFrac,
               },
               0
             )
@@ -460,7 +474,7 @@ export const MenuPage = () => {
               {
                 frame: 12,
                 ease: 'none',
-                duration: 0.12,
+                duration: firstChapterFrac,
                 onUpdate: () => {
                   globalFrameRef.current = frameState.frame;
                 },
@@ -468,7 +482,7 @@ export const MenuPage = () => {
               0
             );
 
-          // Segments 1..4: Continuous Smooth Vessel Morph & 3D Movement Through Chapters 01..04 (0.12 -> 0.92 across full page scroll)
+          // Segments 1..N: Continuous Smooth Vessel Morph & 3D Movement Synchronized Strictly Across ALL Product Sections -> Page End
           const chapterTimelineCoords = isMobile
             ? [
                 { mx: -24, my: -0.12, mScale: 0.84, r: 3.5, ry: 12, s: 1.04 },
@@ -484,18 +498,18 @@ export const MenuPage = () => {
               ];
 
           FILM_CHAPTERS.forEach((chapter, idx) => {
-            const segStart = 0.12 + idx * 0.2;
-            const halfDur = 0.1;
+            const segStart = firstChapterFrac + idx * chapterSpan;
+            const halfDur = chapterSpan * 0.5;
             const targetEndFrame = chapter.endFrame;
-            const pose = chapterTimelineCoords[idx] || chapterTimelineCoords[0];
+            const pose = chapterTimelineCoords[idx % chapterTimelineCoords.length];
 
-            // Morph video frames seamlessly across chapter progress
+            // Morph video frames seamlessly across exact section scroll range
             masterTl.to(
               frameState,
               {
                 frame: targetEndFrame,
                 ease: 'none',
-                duration: 0.2,
+                duration: chapterSpan,
                 onUpdate: () => {
                   globalFrameRef.current = frameState.frame;
                 },
@@ -557,8 +571,8 @@ export const MenuPage = () => {
                   inner,
                   {
                     x: 0,
-                    rotation: idx === FILM_CHAPTERS.length - 1 ? 0 : -pose.r * 0.7,
-                    rotateY: idx === FILM_CHAPTERS.length - 1 ? 0 : -pose.ry * 0.65,
+                    rotation: idx === sectionCount - 1 ? pose.r * 0.35 : -pose.r * 0.7,
+                    rotateY: idx === sectionCount - 1 ? pose.ry * 0.35 : -pose.ry * 0.65,
                     scale: 1,
                     ease: 'sine.inOut',
                     duration: halfDur,
@@ -568,16 +582,16 @@ export const MenuPage = () => {
             }
           });
 
-          // Segment 5: Epilogue -> Page Bottom Fade Out (0.92 -> 1.00 synchronized to max scroll)
+          // Final Segment: Epilogue -> Bottom of #main-wrapper (strictly terminates at 1.00 when page bottom hits viewport bottom)
           masterTl.to(
             overlay,
             {
               opacity: 0,
               y: isMobile ? -36 : -55,
               ease: 'power1.out',
-              duration: 0.08,
+              duration: fadeDur,
             },
-            0.92
+            epilogueFrac
           );
         }
 
