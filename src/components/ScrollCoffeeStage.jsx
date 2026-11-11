@@ -16,24 +16,28 @@ import {
 export const ScrollCoffeeStage = ({
   frameNumberRef,
   fallbackFrame = 1,
+  interactive = false,
   className = '',
 }) => {
   const wrapRef = useRef(null);
   const floatRef = useRef(null);
+  const tiltRef = useRef(null);
   const canvasRef = useRef(null);
   const lastDrawnUrlRef = useRef('');
   const lastCanvasSizeRef = useRef({ width: 0, height: 0 });
+  const dragFrameOffsetRef = useRef(0);
+  const dragStateRef = useRef({ active: false, startX: 0, baseOffset: 0 });
 
-  // Subtle organic floating motion adapted via gsap.matchMedia
+  // Subtle organic floating motion adapted via gsap.matchMedia (stays active on mobile & desktop)
   useEffect(() => {
     if (!floatRef.current) return undefined;
 
     const mm = gsap.matchMedia();
 
-    mm.add('(max-width: 767px) and (prefers-reduced-motion: no-preference)', () => {
+    mm.add('(max-width: 767px)', () => {
       gsap.to(floatRef.current, {
         y: -7,
-        duration: 3.2,
+        duration: 3.1,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
@@ -53,7 +57,71 @@ export const ScrollCoffeeStage = ({
     return () => mm.revert();
   }, []);
 
-  // Main requestAnimationFrame canvas compositing loop
+  // Interactive 3D touch/pointer tilt & horizontal frame drag scrubbing (used on mobile <768px stages)
+  useEffect(() => {
+    if (!interactive) return undefined;
+    const wrapEl = wrapRef.current;
+    const tiltEl = tiltRef.current;
+    if (!wrapEl || !tiltEl) return undefined;
+
+    const handlePointerDown = (e) => {
+      dragStateRef.current = {
+        active: true,
+        startX: e.clientX,
+        baseOffset: dragFrameOffsetRef.current,
+      };
+    };
+
+    const handlePointerMove = (e) => {
+      const rect = wrapEl.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+
+      const relX = (e.clientX - rect.left) / rect.width - 0.5;
+      const relY = (e.clientY - rect.top) / rect.height - 0.5;
+
+      gsap.to(tiltEl, {
+        rotateY: Math.max(-14, Math.min(14, relX * 26)),
+        rotateX: Math.max(-10, Math.min(10, -relY * 18)),
+        scale: dragStateRef.current.active ? 1.04 : 1.02,
+        duration: 0.35,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+
+      if (dragStateRef.current.active) {
+        const deltaX = e.clientX - dragStateRef.current.startX;
+        dragFrameOffsetRef.current = dragStateRef.current.baseOffset + deltaX * 0.14;
+      }
+    };
+
+    const resetTilt = () => {
+      dragStateRef.current.active = false;
+      gsap.to(tiltEl, {
+        rotateY: 0,
+        rotateX: 0,
+        scale: 1,
+        duration: 0.65,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      });
+    };
+
+    wrapEl.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    wrapEl.addEventListener('pointermove', handlePointerMove, { passive: true });
+    wrapEl.addEventListener('pointerup', resetTilt, { passive: true });
+    wrapEl.addEventListener('pointercancel', resetTilt, { passive: true });
+    wrapEl.addEventListener('pointerleave', resetTilt, { passive: true });
+
+    return () => {
+      wrapEl.removeEventListener('pointerdown', handlePointerDown);
+      wrapEl.removeEventListener('pointermove', handlePointerMove);
+      wrapEl.removeEventListener('pointerup', resetTilt);
+      wrapEl.removeEventListener('pointercancel', resetTilt);
+      wrapEl.removeEventListener('pointerleave', resetTilt);
+    };
+  }, [interactive]);
+
+  // Main requestAnimationFrame canvas compositing loop + ResizeObserver layout resilience
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = wrapRef.current;
@@ -67,6 +135,14 @@ export const ScrollCoffeeStage = ({
       { threshold: 0.01 }
     );
     observer.observe(container);
+
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(() => {
+            lastDrawnUrlRef.current = '';
+          })
+        : null;
+    resizeObserver?.observe(container);
 
     const ctx = canvas.getContext('2d', { alpha: true });
     let rafId = 0;
@@ -105,14 +181,21 @@ export const ScrollCoffeeStage = ({
       rafId = requestAnimationFrame(drawLoop);
       if (!isVisible) return;
 
-      const rawTarget = frameNumberRef?.current ?? fallbackFrame;
-      const resolved = findNearestDecodedFrame(rawTarget);
+      const rect = container.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return;
+
+      const rawBase = frameNumberRef?.current ?? fallbackFrame;
+      const rawTarget = rawBase + dragFrameOffsetRef.current;
+      const wrappedTarget =
+        ((((Math.round(rawTarget) - 1) % MENU_FRAME_TOTAL) + MENU_FRAME_TOTAL) %
+          MENU_FRAME_TOTAL) +
+        1;
+      const resolved = findNearestDecodedFrame(wrappedTarget);
       if (!resolved) return;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const rect = container.getBoundingClientRect();
-      const targetW = Math.max(1, Math.round(rect.width * dpr));
-      const targetH = Math.max(1, Math.round(rect.height * dpr));
+      const targetW = Math.round(rect.width * dpr);
+      const targetH = Math.round(rect.height * dpr);
 
       const sizeChanged =
         lastCanvasSizeRef.current.width !== targetW ||
@@ -180,27 +263,40 @@ export const ScrollCoffeeStage = ({
     return () => {
       cancelAnimationFrame(rafId);
       observer.disconnect();
+      resizeObserver?.disconnect();
     };
   }, [frameNumberRef, fallbackFrame]);
 
   return (
-    <div ref={wrapRef} className={`relative aspect-square select-none ${className}`}>
-      <div ref={floatRef} className="relative w-full h-full">
-        {/* Subtle Warm Radial Atmospheric Depth Behind Vessel (No visible border or box) */}
-        <div
-          className="pointer-events-none absolute -inset-[10%] rounded-full"
-          aria-hidden="true"
-          style={{
-            background:
-              'radial-gradient(circle at 50% 54%, rgba(245,197,24,0.09) 0%, rgba(245,197,24,0.025) 38%, rgba(16,16,16,0) 70%)',
-          }}
-        />
+    <div
+      ref={wrapRef}
+      style={interactive ? { perspective: '800px' } : undefined}
+      className={`relative aspect-square select-none ${
+        interactive ? 'touch-pan-y cursor-grab active:cursor-grabbing' : ''
+      } ${className}`}
+    >
+      <div
+        ref={tiltRef}
+        style={interactive ? { transformStyle: 'preserve-3d' } : undefined}
+        className="relative w-full h-full will-change-transform"
+      >
+        <div ref={floatRef} className="relative w-full h-full">
+          {/* Subtle Warm Radial Atmospheric Depth Behind Vessel (No visible border or box) */}
+          <div
+            className="pointer-events-none absolute -inset-[10%] rounded-full"
+            aria-hidden="true"
+            style={{
+              background:
+                'radial-gradient(circle at 50% 54%, rgba(245,197,24,0.09) 0%, rgba(245,197,24,0.025) 38%, rgba(16,16,16,0) 70%)',
+            }}
+          />
 
-        {/* Alpha-Feathered Seamless Coffee Frame Canvas (hardware-accelerated black-floor alignment) */}
-        <canvas
-          ref={canvasRef}
-          className="relative z-10 w-full h-full block brightness-[0.92] contrast-[1.12]"
-        />
+          {/* Alpha-Feathered Seamless Coffee Frame Canvas (hardware-accelerated black-floor alignment) */}
+          <canvas
+            ref={canvasRef}
+            className="relative z-10 w-full h-full block brightness-[0.92] contrast-[1.12]"
+          />
+        </div>
       </div>
     </div>
   );

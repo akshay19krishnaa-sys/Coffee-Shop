@@ -38,27 +38,28 @@ const ChapterFilmSection = ({
   const displayPrice = activeSize?.price ?? product.price;
 
   // Mobile-only (<768px) stacked cup ScrollTrigger animation:
-  // Keeps the vessel centered inside its dedicated flex slot while moving, scaling, tilting & scrubbing frames smoothly.
+  // Keeps ScrollTrigger + 3D tilt/scale + frame scrubbing active across the full chapter height without covering typography.
   useEffect(() => {
     const cupEl = mobileCupStageRef.current;
     const chapterEl = articleRef.current;
     if (!cupEl || !chapterEl) return undefined;
 
     const mm = gsap.matchMedia();
-    mm.add('(max-width: 767px) and (prefers-reduced-motion: no-preference)', () => {
+    mm.add('(max-width: 767px)', () => {
       gsap.fromTo(
         cupEl,
-        { opacity: 0.72, y: 18, scale: 0.92, rotation: -2.5 },
+        { opacity: 0.78, y: 16, scale: 0.9, rotation: -3, rotateY: -8, transformPerspective: 850 },
         {
           opacity: 1,
           y: 0,
           scale: 1,
           rotation: 0,
-          duration: 0.8,
+          rotateY: 0,
+          duration: 0.75,
           ease: 'power3.out',
           scrollTrigger: {
-            trigger: cupEl,
-            start: 'top 90%',
+            trigger: chapterEl,
+            start: 'top 92%',
             toggleActions: 'play none none reverse',
           },
         }
@@ -66,24 +67,29 @@ const ChapterFilmSection = ({
 
       ScrollTrigger.create({
         trigger: chapterEl,
-        start: 'top 80%',
-        end: 'bottom 25%',
-        scrub: 0.7,
+        start: 'top top',
+        end: 'bottom 35%',
+        scrub: 0.6,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           const p = self.progress;
           mobileFrameRef.current =
             chapter.startFrame + p * (chapter.endFrame - chapter.startFrame);
 
-          // Bounded smooth horizontal sway + subtle tilt within its vertical slot (never overlaps text)
-          const xSway = Math.sin(p * Math.PI * 2) * 12;
-          const angle = Math.sin(p * Math.PI * 1.5) * 2.6;
-          const pulse = 1 + Math.sin(p * Math.PI) * 0.05;
+          // Responsive 3D tilt, bounded sway & scale pulse scaled cleanly for mobile viewport
+          const xSway = Math.sin(p * Math.PI * 2) * 16;
+          const yLift = -Math.sin(p * Math.PI) * 10;
+          const angle = Math.sin(p * Math.PI * 1.5) * 3.2;
+          const yaw3d = Math.sin(p * Math.PI * 2) * 10;
+          const pulse = 0.95 + Math.sin(p * Math.PI) * 0.08;
 
           gsap.set(cupEl, {
             x: xSway,
+            y: yLift,
             rotation: angle,
+            rotateY: yaw3d,
             scale: pulse,
+            transformPerspective: 850,
           });
         },
       });
@@ -106,18 +112,22 @@ const ChapterFilmSection = ({
       }}
       className={`story-chapter relative z-[5] scroll-mt-20 md:scroll-mt-0 ${subtleToneBg} transition-colors duration-700`}
     >
-      {/* Mobile uses stacked flex-col vertical breathing room; desktop (>=768px) layout untouched */}
-      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 pt-20 pb-14 sm:pt-24 sm:pb-20 md:pt-28 md:pb-28 lg:py-36">
-        <div className="flex flex-col gap-6 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
-          {/* Mobile-Only Centered Vessel Stage in Normal Flex Flow (max-h-[40vh], zero collision with typography below) */}
-          <div className="md:hidden w-full flex justify-center pt-1 pb-2">
+      {/* Mobile uses sticky theatre band + flex-col vertical spacing; desktop (>=768px) layout untouched */}
+      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 pt-16 pb-14 sm:pt-20 sm:pb-20 md:pt-28 md:pb-28 lg:py-36">
+        <div className="flex flex-col gap-5 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
+          {/* Mobile-Only Sticky Interactive Vessel Theatre (defined h-[36dvh], scrim fades scrolled text cleanly) */}
+          <div className="md:hidden sticky top-[68px] z-20 w-full flex flex-col items-center pt-2 pb-5 bg-gradient-to-b from-[#101010] via-[#101010]/96 to-transparent">
             <div ref={mobileCupStageRef} className="will-change-transform">
               <ScrollCoffeeStage
                 frameNumberRef={mobileFrameRef}
                 fallbackFrame={chapter.startFrame}
-                className="w-[min(70vw,36vh)] max-w-[280px] max-h-[40vh] mx-auto"
+                interactive
+                className="w-[min(76vw,36dvh)] h-[min(76vw,36dvh)] min-h-[210px] max-w-[290px] max-h-[300px] mx-auto"
               />
             </div>
+            <span className="mt-1 text-[9px] font-mono uppercase tracking-[0.26em] text-white/35 pointer-events-none select-none">
+              Drag Vessel To Rotate 360°
+            </span>
           </div>
 
           {/* BEAT 1: PRODUCT INTRODUCTION */}
@@ -350,34 +360,44 @@ export const MenuPage = () => {
     chapterRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Initial preload, ScrollTrigger image readiness refresh, & ?category= deep-linking
+  // Initial preload, multi-stage ScrollTrigger layout refresh (100dvh + fonts + images), & ?category= deep-linking
   useEffect(() => {
-    loadFrameImage(buildMenuFrameUrl(1)).then(() => {
+    const refreshLayout = () => {
       ScrollTrigger.refresh();
-    });
+    };
+
+    loadFrameImage(buildMenuFrameUrl(1)).then(refreshLayout);
     if (FILM_CHAPTERS[0]) {
       preloadFrameSequence(FILM_CHAPTERS[0].frames);
     }
 
+    document.fonts?.ready?.then(refreshLayout);
+    window.addEventListener('load', refreshLayout, { once: true });
+    const settleTimer = setTimeout(refreshLayout, 220);
+
+    let deepLinkTimer = null;
     const requestedCategory = searchParams.get('category');
     if (requestedCategory) {
       const normalized = getExperienceCategoryQueryAlias(requestedCategory);
       const chapterIdx = FILM_CHAPTERS.findIndex((c) => c.categoryId === normalized);
       if (chapterIdx >= 0) {
         preloadFrameSequence(FILM_CHAPTERS[chapterIdx].frames);
-        const scrollTimer = setTimeout(() => {
+        deepLinkTimer = setTimeout(() => {
           chapterRefs.current[chapterIdx]?.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
           });
+          ScrollTrigger.refresh();
         }, 180);
-        return () => clearTimeout(scrollTimer);
       }
     } else {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     return () => {
+      window.removeEventListener('load', refreshLayout);
+      clearTimeout(settleTimer);
+      if (deepLinkTimer) clearTimeout(deepLinkTimer);
       if (addTimerRef.current) clearTimeout(addTimerRef.current);
       if (companionTimerRef.current) clearTimeout(companionTimerRef.current);
     };
@@ -415,7 +435,7 @@ export const MenuPage = () => {
 
     mm.add(
       {
-        isMobile: '(max-width: 767px) and (prefers-reduced-motion: no-preference)',
+        isMobile: '(max-width: 767px)',
         isTabletDesktop: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
       },
       (context) => {
@@ -457,27 +477,30 @@ export const MenuPage = () => {
           });
         }
 
-        // 3A. Mobile (<768px) stacked intro cup animation (moves vertically/horizontally without overlapping text)
+        // 3A. Mobile (<768px) intro cup animation (always active on mobile with smooth 3D rotation, scale & frame scrub)
         if (isMobile && mobileIntroCup && introEl) {
           gsap.fromTo(
             mobileIntroCup,
-            { opacity: 0, y: 20, scale: 0.94 },
-            { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: 'power3.out', delay: 0.15 }
+            { opacity: 0, y: 20, scale: 0.92, transformPerspective: 850 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.95, ease: 'power3.out', delay: 0.1 }
           );
 
           ScrollTrigger.create({
             trigger: introEl,
             start: 'top top',
-            end: 'bottom top',
-            scrub: 0.7,
+            end: '+=150%',
+            scrub: 0.6,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               const p = self.progress;
-              mobileIntroFrameRef.current = 1 + p * 14;
+              mobileIntroFrameRef.current = 1 + p * 18;
               gsap.set(mobileIntroCup, {
-                y: -p * 16,
-                rotation: Math.sin(p * Math.PI) * 2.5,
-                scale: 1 - p * 0.06,
+                y: -p * 24,
+                x: Math.sin(p * Math.PI) * 14,
+                rotation: Math.sin(p * Math.PI) * 3.5,
+                rotateY: Math.sin(p * Math.PI * 1.5) * 12,
+                scale: 0.95 + Math.sin(p * Math.PI) * 0.08,
+                transformPerspective: 850,
               });
             },
           });
@@ -724,10 +747,10 @@ export const MenuPage = () => {
         </div>
       </div>
 
-      {/* 1. INTRO SECTION */}
+      {/* 1. INTRO SECTION (100dvh on mobile for accurate mobile address-bar viewport sizing) */}
       <section
         ref={introSectionRef}
-        className="relative z-20 min-h-[100svh] flex flex-col justify-between items-center text-center max-w-6xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-24 sm:pt-28 pb-24 sm:pb-28 md:pb-12"
+        className="relative z-20 min-h-[100dvh] md:min-h-[100svh] flex flex-col justify-between items-center text-center max-w-6xl mx-auto px-4 min-[375px]:px-5 sm:px-8 pt-24 sm:pt-28 pb-24 sm:pb-28 md:pb-12"
       >
         <div
           ref={introTitleRef}
@@ -745,15 +768,19 @@ export const MenuPage = () => {
           </h1>
         </div>
 
-        {/* Mobile (<768px) Stacked Vertical Opening Vessel (max-h-[40vh], zero overlap with title or links) */}
-        <div className="md:hidden my-auto py-4 w-full flex justify-center">
+        {/* Mobile (<768px) Interactive Opening Vessel (explicit height prevents 0-height collapse) */}
+        <div className="md:hidden my-auto py-4 w-full flex flex-col items-center">
           <div ref={mobileIntroCupRef} className="will-change-transform">
             <ScrollCoffeeStage
               frameNumberRef={mobileIntroFrameRef}
               fallbackFrame={1}
-              className="w-[min(68vw,36vh)] max-w-[270px] max-h-[40vh] mx-auto"
+              interactive
+              className="w-[min(78vw,38dvh)] h-[min(78vw,38dvh)] min-h-[220px] max-w-[300px] max-h-[310px] mx-auto"
             />
           </div>
+          <span className="mt-1.5 text-[9px] font-mono uppercase tracking-[0.26em] text-white/35 pointer-events-none select-none">
+            Swipe Vessel Or Scroll To Pour
+          </span>
         </div>
 
         {/* Tablet/Desktop reduced-motion fallback static hero cup only */}
