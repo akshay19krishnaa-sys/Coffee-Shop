@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, ArrowUpRight } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const Navbar = () => {
@@ -90,11 +90,6 @@ export const Navbar = () => {
     navigate(link.path);
   };
 
-  const handleOrderOnline = () => {
-    setMobileMenuOpen(false);
-    openDrawer();
-  };
-
   const isLinkActive = (link) => {
     if (link.path === '/menu') return isMenuPage;
     if (link.type === 'hash') return location.pathname === '/' && isContactInView;
@@ -111,12 +106,12 @@ export const Navbar = () => {
             : 'bg-transparent py-4 sm:py-5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr]">
           {/* Left: BREW. Text Logo */}
           <Link
             to="/"
             onClick={(e) => handleLinkClick(e, { type: 'route', path: '/' })}
-            className="group flex items-center gap-3 select-none cursor-pointer py-1"
+            className="group flex items-center gap-3 select-none cursor-pointer py-1 lg:justify-self-start"
             aria-label="BREW. Home"
           >
             <div className="flex flex-col">
@@ -130,7 +125,7 @@ export const Navbar = () => {
           </Link>
 
           {/* Center: Simplified Desktop Navigation (Home, Menu, Contact) */}
-          <nav className="hidden lg:flex items-center gap-8 xl:gap-10" aria-label="Main Navigation">
+          <nav className="hidden lg:flex lg:justify-self-center items-center gap-10 xl:gap-12" aria-label="Main Navigation">
             {navLinks.map((link) => {
               const active = isLinkActive(link);
               return (
@@ -138,7 +133,7 @@ export const Navbar = () => {
                   key={link.name}
                   href={link.path}
                   onClick={(e) => handleLinkClick(e, link)}
-                  className={`relative text-xs font-mono uppercase tracking-[0.2em] transition-colors py-2 group cursor-pointer min-h-[44px] flex items-center ${
+                  className={`relative text-xs font-mono uppercase tracking-[0.22em] transition-colors py-2 group cursor-pointer min-h-[44px] flex items-center ${
                     active ? 'text-[#F5C518] font-bold' : 'text-white/75 hover:text-white'
                   }`}
                 >
@@ -153,8 +148,8 @@ export const Navbar = () => {
             })}
           </nav>
 
-          {/* Right: Cart Button + Order Online CTA / Hamburger */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right: Cart Bag Button + Mobile/Tablet Hamburger */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:justify-self-end">
             <button
               type="button"
               onClick={openDrawer}
@@ -167,16 +162,6 @@ export const Navbar = () => {
                   {cartCount}
                 </span>
               )}
-            </button>
-
-            {/* Desktop Order Online Button */}
-            <button
-              type="button"
-              onClick={handleOrderOnline}
-              className="hidden lg:inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded bg-[#F5C518] text-[#101010] font-syne font-black text-xs uppercase tracking-widest hover:bg-[#FFDF40] hover:shadow-[0_0_25px_rgba(245,197,24,0.45)] transition-all transform active:scale-95 cursor-pointer"
-            >
-              <span>ORDER ONLINE</span>
-              <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
 
             {/* Mobile & Tablet Hamburger Button (< 1024px) */}
@@ -241,16 +226,7 @@ export const Navbar = () => {
           </nav>
         </div>
 
-        <div className="space-y-4 pt-6 border-t border-white/10">
-          <button
-            type="button"
-            onClick={handleOrderOnline}
-            className="w-full min-h-[48px] py-3.5 bg-[#F5C518] text-[#101010] font-syne font-black text-xs uppercase tracking-widest rounded flex items-center justify-center gap-2 cursor-pointer shadow-lg"
-          >
-            <span>ORDER ONLINE NOW</span>
-            <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
-          </button>
-
+        <div className="pt-6 border-t border-white/10">
           <div className="flex items-center justify-between text-xs font-mono text-white/40">
             <span>COFFEE. CRAFTED. CULTURE.</span>
             <span className="text-[#F5C518]">EST. 2026</span>
