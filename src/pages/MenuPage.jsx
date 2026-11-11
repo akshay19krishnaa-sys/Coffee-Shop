@@ -422,13 +422,13 @@ export const MenuPage = () => {
             scrollTrigger: {
               trigger: mainEl,
               start: 'top top',
-              end: 'bottom bottom',
+              end: 'max',
               scrub: 1,
               invalidateOnRefresh: true,
             },
           });
 
-          // Segment 0 -> 1: Intro -> Chapter 01 Entry (14% of total scroll)
+          // Segment 0 -> 1: Intro -> Chapter 01 Entry (0 -> 0.12 of total document scroll)
           if (introTitleRef.current && introEl) {
             masterTl.to(
               introTitleRef.current,
@@ -436,9 +436,9 @@ export const MenuPage = () => {
                 y: isMobile ? -28 : -50,
                 opacity: isMobile ? 0.2 : 0,
                 ease: 'none',
-                duration: 0.1,
+                duration: 0.09,
               },
-              0.02
+              0.01
             );
           }
 
@@ -451,7 +451,7 @@ export const MenuPage = () => {
                 scale: () => (isMobile ? 0.8 : window.innerWidth < 992 ? 0.92 : 0.95),
                 opacity: isMobile ? 0.42 : 1,
                 ease: 'power1.inOut',
-                duration: 0.14,
+                duration: 0.12,
               },
               0
             )
@@ -460,7 +460,7 @@ export const MenuPage = () => {
               {
                 frame: 12,
                 ease: 'none',
-                duration: 0.14,
+                duration: 0.12,
                 onUpdate: () => {
                   globalFrameRef.current = frameState.frame;
                 },
@@ -468,7 +468,7 @@ export const MenuPage = () => {
               0
             );
 
-          // Segments 1..4: Continuous Smooth Vessel Morph & 3D Movement Through Chapters 01..04 (4 * 20% = 80%)
+          // Segments 1..4: Continuous Smooth Vessel Morph & 3D Movement Through Chapters 01..04 (0.12 -> 0.92 across full page scroll)
           const chapterTimelineCoords = isMobile
             ? [
                 { mx: -24, my: -0.12, mScale: 0.84, r: 3.5, ry: 12, s: 1.04 },
@@ -484,7 +484,7 @@ export const MenuPage = () => {
               ];
 
           FILM_CHAPTERS.forEach((chapter, idx) => {
-            const segStart = 0.14 + idx * 0.2;
+            const segStart = 0.12 + idx * 0.2;
             const halfDur = 0.1;
             const targetEndFrame = chapter.endFrame;
             const pose = chapterTimelineCoords[idx] || chapterTimelineCoords[0];
@@ -568,16 +568,16 @@ export const MenuPage = () => {
             }
           });
 
-          // Segment 5: Quiet Epilogue Fade Out (final 6%)
+          // Segment 5: Epilogue -> Page Bottom Fade Out (0.92 -> 1.00 synchronized to max scroll)
           masterTl.to(
             overlay,
             {
               opacity: 0,
               y: isMobile ? -36 : -55,
               ease: 'power1.out',
-              duration: 0.06,
+              duration: 0.08,
             },
-            0.94
+            0.92
           );
         }
 
@@ -704,7 +704,7 @@ export const MenuPage = () => {
   };
 
   return (
-    <main
+    <div
       ref={pageRef}
       className="relative bg-[#101010] text-white overflow-x-clip pb-28 sm:pb-32 md:pb-0 selection:bg-[#F5C518] selection:text-[#101010]"
     >
@@ -829,6 +829,6 @@ export const MenuPage = () => {
           <span>Bag ({cartCount})</span>
         </button>
       )}
-    </main>
+    </div>
   );
 };
