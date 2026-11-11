@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowLeft, ShoppingBag, Sparkles } from 'lucide-react';
 import { MENU_CATEGORIES, SIGNATURE_COFFEES } from '../data/coffeeData';
 import { CoffeeCard } from '../components/CoffeeCard';
+import { MenuShowcase } from '../components/MenuShowcase';
 import { useCart } from '../context/CartContext';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -84,24 +85,24 @@ export const MenuPage = () => {
 
   return (
     <div className="min-h-screen bg-[#101010] text-white pt-20 sm:pt-24">
-      {/* ── 1. ATTRACTIVE MENU BANNER ── */}
+      {/* ── 1. EDITORIAL MENU HEADER BANNER ── */}
       <section
         ref={bannerRef}
-        className="relative overflow-hidden border-b border-white/10 bg-[#0d0d0d] py-14 sm:py-20 lg:py-24"
+        className="relative overflow-hidden border-b border-white/10 bg-[#0d0d0d] py-8 sm:py-12"
       >
         {/* Crisp Coffee Background Visual */}
         <div className="absolute inset-0 pointer-events-none">
           <img
             src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=85&w=2000&auto=format&fit=crop"
             alt="Specialty coffee beans and craft brewing background"
-            className="w-full h-full object-cover object-center opacity-30 filter contrast-110"
+            className="w-full h-full object-cover object-center opacity-25 filter contrast-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#101010]/80 via-[#101010]/60 to-[#0d0d0d]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#101010]/85 via-[#101010]/65 to-[#0d0d0d]" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb & Demo Pricing Pill */}
-          <div className="banner-reveal flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="banner-reveal flex flex-wrap items-center justify-between gap-4 mb-4">
             <Link
               to="/"
               className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-white/70 hover:text-[#F5C518] transition-colors min-h-[44px]"
@@ -116,8 +117,8 @@ export const MenuPage = () => {
             </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <div className="space-y-4 max-w-2xl">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+            <div className="space-y-3 max-w-2xl">
               <div className="banner-reveal inline-flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" />
                 <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#F5C518]">
@@ -125,12 +126,12 @@ export const MenuPage = () => {
                 </span>
               </div>
 
-              <h1 className="banner-reveal font-syne font-black text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight text-white leading-[0.92]">
+              <h1 className="banner-reveal font-syne font-black text-4xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-[0.92]">
                 THE <span className="text-[#F5C518]">MENU.</span>
               </h1>
 
               <p className="banner-reveal text-sm sm:text-base text-white/80 font-sans-custom font-light leading-relaxed">
-                From rich 9.2-bar single-origin espressos and 24-hour Kyoto cold drips to house-crafted signature pours. Customize milk, roast grind, and temperature to match your palate.
+                Explore our signature flagship pours on the interactive stage below, or filter our full collection by roast and extraction craft.
               </p>
             </div>
 
@@ -156,9 +157,21 @@ export const MenuPage = () => {
         </div>
       </section>
 
-      {/* ── 2. CATEGORY FILTERS & PRODUCT GRID ── */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-[#101010]">
+      {/* ── 2. INTERACTIVE ANIMATED COFFEE PRODUCT SHOWCASE (4 Uploaded Studio Photos) ── */}
+      <MenuShowcase />
+
+      {/* ── 3. CATEGORY FILTERS & FULL MENU CATALOG ── */}
+      <section className="py-14 sm:py-20 bg-[#0d0d0d]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 space-y-2">
+            <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#F5C518]">
+              COMPLETE COLLECTION
+            </span>
+            <h2 className="font-syne font-black text-2xl sm:text-4xl uppercase tracking-tight text-white">
+              BROWSE BY <span className="text-[#F5C518]">CATEGORY.</span>
+            </h2>
+          </div>
+
           {/* Wrapped Category Filters (Zero forced horizontal scrolling on mobile) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 mb-10 border-b border-white/10">
             <div

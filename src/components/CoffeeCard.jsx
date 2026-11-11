@@ -29,12 +29,18 @@ export const CoffeeCard = ({ coffee, className = '' }) => {
     >
       <div>
         {/* Product Image with Smooth Hover Zoom */}
-        <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-5 bg-[#0a0a0a] border border-white/5">
+        <div
+          className={`relative aspect-[4/3] rounded-xl overflow-hidden mb-5 border border-white/5 ${
+            coffee.containImage ? 'bg-[#d8d8d8]' : 'bg-[#0a0a0a]'
+          }`}
+        >
           <img
             src={coffee.image}
             alt={coffee.name}
             loading="lazy"
-            className="w-full h-full object-cover object-center group-hover:scale-106 transition-transform duration-700 ease-out filter contrast-105 brightness-95"
+            className={`w-full h-full object-center group-hover:scale-105 transition-transform duration-700 ease-out filter contrast-105 ${
+              coffee.containImage ? 'object-contain' : 'object-cover brightness-95'
+            }`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#141414]/90 via-transparent to-transparent opacity-80 pointer-events-none" />
 

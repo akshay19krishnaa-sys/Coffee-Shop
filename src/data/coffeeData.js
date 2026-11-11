@@ -1,3 +1,93 @@
+import espressoImg from '../assets/coffee/espresso.jpg';
+import cappuccinoImg from '../assets/coffee/cappuccino.jpg';
+import icedCoffeeImg from '../assets/coffee/iced-coffee.jpg';
+import mochaImg from '../assets/coffee/mocha.jpg';
+
+export const SHOWCASE_PRODUCTS = [
+  {
+    id: 'espresso',
+    number: '01',
+    categoryId: 'espresso',
+    category: 'Espresso Classics',
+    name: 'Espresso',
+    subtitle: '9.2-Bar Reserve Extraction',
+    tagline:
+      'Pure, velvety double ristretto crowned with thick hazelnut-toned tiger crema inside matte obsidian stoneware.',
+    ingredients: '18g Huila & Yirgacheffe Blend • 135 PPM Remineralized Water',
+    notes: ['Dark Cacao 90%', 'Roasted Fig', 'Velvet Crema'],
+    origin: 'Huila, Colombia & Ethiopia',
+    elevation: '2,100 MASL',
+    price: 5.5,
+    sizes: [
+      { name: 'Single Shot (1 oz)', oz: '1 oz', price: 4.5 },
+      { name: 'Double Ristretto (2 oz)', oz: '2 oz', price: 5.5 },
+      { name: 'Quad Reserve (4 oz)', oz: '4 oz', price: 7.5 },
+    ],
+    image: espressoImg,
+  },
+  {
+    id: 'cappuccino',
+    number: '02',
+    categoryId: 'espresso',
+    category: 'Microfoam Craft',
+    name: 'Cappuccino',
+    subtitle: 'Hand-Poured Tulip Microfoam',
+    tagline:
+      'Balanced thirds of sweet single-origin espresso, steamed silk milk, and dense glossy microfoam finished with latte art.',
+    ingredients: 'Double Espresso • Steamed Whole or Oat Milk • Sweet Cream Foam',
+    notes: ['Brown Sugar', 'Toasted Hazelnut', 'Silk Caramel'],
+    origin: 'Tarrazú, Costa Rica',
+    elevation: '1,950 MASL',
+    price: 6.5,
+    sizes: [
+      { name: 'Classic (6 oz)', oz: '6 oz', price: 6.5 },
+      { name: 'Dry Foam (6 oz)', oz: '6 oz', price: 6.5 },
+      { name: 'Large (10 oz)', oz: '10 oz', price: 7.5 },
+    ],
+    image: cappuccinoImg,
+  },
+  {
+    id: 'iced-coffee',
+    number: '03',
+    categoryId: 'cold',
+    category: 'Cold Coffee',
+    name: 'Iced Coffee',
+    subtitle: 'Cascading Cold Swirl Over Crystal Ice',
+    tagline:
+      '24-hour slow-steeped specialty cold brew poured over hand-cut crystal ice and ribboned with chilled Madagascar oat milk.',
+    ingredients: '24h Cold Brew Concentrate • Crystal Ice • Chilled Oat Cream',
+    notes: ['Madagascar Vanilla', 'Blackberry', 'Sweet Toffee'],
+    origin: 'Sidama, Ethiopia',
+    elevation: '2,200 MASL',
+    price: 7.25,
+    sizes: [
+      { name: 'Standard (12 oz)', oz: '12 oz', price: 7.25 },
+      { name: 'Tall Reserve (16 oz)', oz: '16 oz', price: 8.5 },
+    ],
+    image: icedCoffeeImg,
+  },
+  {
+    id: 'mocha',
+    number: '04',
+    categoryId: 'signature',
+    category: 'Signature Drinks',
+    name: 'Mocha',
+    subtitle: '72% Belgian Single-Origin Cacao',
+    tagline:
+      'Rich espresso folded into melted single-origin dark chocolate ganache, steamed microfoam, and dark cocoa lattice.',
+    ingredients: 'Double Ristretto • 72% Dark Chocolate Ganache • Cocoa Dust',
+    notes: ['Belgian Dark Cacao', 'Warm Espresso', 'Bittersweet Truffle'],
+    origin: 'Boquete & Ecuador Cacao',
+    elevation: '1,900 MASL',
+    price: 7.8,
+    sizes: [
+      { name: 'Regular (8 oz)', oz: '8 oz', price: 7.8 },
+      { name: 'Large (12 oz)', oz: '12 oz', price: 9.0 },
+    ],
+    image: mochaImg,
+  },
+];
+
 export const MENU_CATEGORIES = [
   { id: 'all', name: 'All' },
   { id: 'espresso', name: 'Espresso' },
@@ -63,8 +153,8 @@ export const SIGNATURE_COFFEES = [
     intensity: 5,
     acidity: 2,
     body: 5,
-    image:
-      'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?q=80&w=1200&auto=format&fit=crop',
+    image: espressoImg,
+    containImage: true,
     featured: true,
   },
   {
@@ -138,8 +228,8 @@ export const SIGNATURE_COFFEES = [
     intensity: 3,
     acidity: 2,
     body: 4,
-    image:
-      'https://images.unsplash.com/photo-1572442388796-11668a67e53d?q=80&w=1200&auto=format&fit=crop',
+    image: cappuccinoImg,
+    containImage: true,
     featured: true,
   },
   {
@@ -213,8 +303,8 @@ export const SIGNATURE_COFFEES = [
     intensity: 3,
     acidity: 2,
     body: 4,
-    image:
-      'https://images.unsplash.com/photo-1517701604599-bb29b565090c?q=80&w=1200&auto=format&fit=crop',
+    image: icedCoffeeImg,
+    containImage: true,
     featured: false,
   },
   {
@@ -265,6 +355,31 @@ export const SIGNATURE_COFFEES = [
     body: 4,
     image:
       'https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=1200&auto=format&fit=crop',
+    featured: true,
+  },
+  {
+    id: 'mocha',
+    category: 'signature',
+    categoryName: 'Signature Drinks',
+    name: 'BREW. Dark Cacao Mocha',
+    tagline:
+      'Rich espresso folded into melted single-origin 72% Belgian dark chocolate ganache and cocoa lattice.',
+    ingredients: 'Double Ristretto • 72% Dark Chocolate Ganache • Cocoa Dust',
+    price: 7.8,
+    sizes: [
+      { name: 'Regular (8 oz)', oz: '8 oz', price: 7.8 },
+      { name: 'Large (12 oz)', oz: '12 oz', price: 9.0 },
+    ],
+    roast: 'Dark Roast',
+    origin: 'Boquete & Ecuador Cacao',
+    elevation: '1,900 MASL',
+    process: 'Washed & Slow Cacao',
+    notes: ['Belgian Dark Cacao', 'Warm Espresso', 'Bittersweet Truffle'],
+    intensity: 4,
+    acidity: 2,
+    body: 5,
+    image: mochaImg,
+    containImage: true,
     featured: true,
   },
   {
