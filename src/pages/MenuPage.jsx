@@ -29,74 +29,9 @@ const ChapterFilmSection = ({
   isJustAdded,
   justAddedCompanionId,
 }) => {
-  const articleRef = useRef(null);
-  const mobileCupStageRef = useRef(null);
-  const mobileFrameRef = useRef(chapter.startFrame);
-
   const { product, companions } = chapter;
   const activeSize = product.sizes?.[selectedSizeIndex] || product.sizes?.[0];
   const displayPrice = activeSize?.price ?? product.price;
-
-  // Mobile-only (<768px) stacked cup ScrollTrigger animation:
-  // Keeps ScrollTrigger + 3D tilt/scale + frame scrubbing active across the full chapter height without covering typography.
-  useEffect(() => {
-    const cupEl = mobileCupStageRef.current;
-    const chapterEl = articleRef.current;
-    if (!cupEl || !chapterEl) return undefined;
-
-    const mm = gsap.matchMedia();
-    mm.add('(max-width: 767px)', () => {
-      gsap.fromTo(
-        cupEl,
-        { opacity: 0.78, y: 16, scale: 0.9, rotation: -3, rotateY: -8, transformPerspective: 850 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          rotateY: 0,
-          duration: 0.75,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: chapterEl,
-            start: 'top 92%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-
-      ScrollTrigger.create({
-        trigger: chapterEl,
-        start: 'top top',
-        end: 'bottom 35%',
-        scrub: 0.6,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const p = self.progress;
-          mobileFrameRef.current =
-            chapter.startFrame + p * (chapter.endFrame - chapter.startFrame);
-
-          // Responsive 3D tilt, bounded sway & scale pulse scaled cleanly for mobile viewport
-          const xSway = Math.sin(p * Math.PI * 2) * 16;
-          const yLift = -Math.sin(p * Math.PI) * 10;
-          const angle = Math.sin(p * Math.PI * 1.5) * 3.2;
-          const yaw3d = Math.sin(p * Math.PI * 2) * 10;
-          const pulse = 0.95 + Math.sin(p * Math.PI) * 0.08;
-
-          gsap.set(cupEl, {
-            x: xSway,
-            y: yLift,
-            rotation: angle,
-            rotateY: yaw3d,
-            scale: pulse,
-            transformPerspective: 850,
-          });
-        },
-      });
-    });
-
-    return () => mm.revert();
-  }, [chapter.startFrame, chapter.endFrame]);
 
   const subtleToneBg =
     chapterIndex % 2 === 1
@@ -106,31 +41,12 @@ const ChapterFilmSection = ({
   return (
     <article
       id={`chapter-${chapter.categoryId}`}
-      ref={(el) => {
-        articleRef.current = el;
-        if (typeof chapterRef === 'function') chapterRef(el);
-      }}
+      ref={chapterRef}
       className={`story-chapter relative z-10 pointer-events-auto scroll-mt-20 md:scroll-mt-0 ${subtleToneBg} transition-colors duration-700`}
     >
-      {/* Mobile uses z-0 background vessel + z-20 typography column; desktop (>=768px) layout untouched */}
-      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 pt-16 pb-14 sm:pt-20 sm:pb-20 md:pt-28 md:pb-28 lg:py-36">
-        <div className="relative flex flex-col gap-5 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
-          {/* Mobile-Only Sticky Background Vessel Stage (strictly z-0 pointer-events-none behind typography) */}
-          <div
-            aria-hidden="true"
-            className="md:hidden sticky top-[72px] z-0 pointer-events-none w-full h-[38dvh] min-h-[210px] max-h-[320px] flex items-center justify-center"
-          >
-            <div ref={mobileCupStageRef} className="will-change-transform pointer-events-none">
-              <ScrollCoffeeStage
-                frameNumberRef={mobileFrameRef}
-                fallbackFrame={chapter.startFrame}
-                className="w-[min(76vw,36dvh)] h-[min(76vw,36dvh)] min-h-[210px] max-w-[290px] max-h-[300px] mx-auto"
-              />
-            </div>
-          </div>
-
-          <div className="relative z-20 pointer-events-auto">
-            {/* BEAT 1: PRODUCT INTRODUCTION */}
+      <div className="max-w-7xl mx-auto px-4 min-[375px]:px-5 sm:px-8 lg:px-12 xl:px-14 py-16 sm:py-22 md:pt-28 md:pb-28 lg:py-36">
+        <div className="relative z-10 pointer-events-auto flex flex-col gap-5 md:block md:ml-[45%] lg:ml-[44%] xl:ml-[45%] md:max-w-[520px] lg:max-w-[560px] xl:max-w-[600px]">
+          {/* BEAT 1: PRODUCT INTRODUCTION */}
           <div className="beat-intro space-y-4 sm:space-y-6 pb-16 sm:pb-22 md:pb-28 lg:pb-32">
             <div className="reveal-line flex items-center gap-3 sm:gap-4">
               <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.32em] text-[#F5C518]">
@@ -322,7 +238,6 @@ const ChapterFilmSection = ({
               </div>
             )}
           </div>
-          </div>
         </div>
       </div>
     </article>
@@ -343,8 +258,6 @@ export const MenuPage = () => {
   const stageOverlayRef = useRef(null);
   const cupMoverRef = useRef(null);
   const cupInnerRef = useRef(null);
-  const mobileIntroCupRef = useRef(null);
-  const mobileIntroFrameRef = useRef(1);
   const epilogueRef = useRef(null);
   const chapterRefs = useRef([]);
   const globalFrameRef = useRef(1);
@@ -430,32 +343,32 @@ export const MenuPage = () => {
     };
   }, []);
 
-  // Unified Responsive GSAP ScrollTrigger Film Experience (Mobile AND Desktop with adapted transforms/positions)
+  // Unified Single-Vessel ScrollTrigger Master Timeline (Mobile & Desktop share ONE persistent canvas)
   useEffect(() => {
     const mm = gsap.matchMedia();
 
     mm.add(
       {
         isMobile: '(max-width: 767px)',
-        isTabletDesktop: '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
+        isTabletDesktop: '(min-width: 768px)',
       },
       (context) => {
         const { isMobile } = context.conditions;
 
+        const mainEl = pageRef.current;
         const mover = cupMoverRef.current;
         const inner = cupInnerRef.current;
         const overlay = stageOverlayRef.current;
-        const mobileIntroCup = mobileIntroCupRef.current;
         const introEl = introSectionRef.current;
 
-        // 1. Lazy preloading per chapter on both mobile and desktop
+        // 1. Lazy preloading per chapter
         FILM_CHAPTERS.forEach((chapter, idx) => {
           const chapterEl = chapterRefs.current[idx];
           if (!chapterEl) return;
 
           ScrollTrigger.create({
             trigger: chapterEl,
-            start: isMobile ? 'top 135%' : 'top 150%',
+            start: isMobile ? 'top 140%' : 'top 150%',
             once: true,
             onEnter: () => {
               preloadFrameSequence(chapter.frames);
@@ -466,145 +379,209 @@ export const MenuPage = () => {
           });
         });
 
-        // 2. Identical Cinematic Intro Heading Entrance
+        // 2. Intro Heading Entrance
         if (introTitleRef.current) {
           gsap.from(introTitleRef.current.children, {
-            y: isMobile ? 24 : 34,
+            y: isMobile ? 22 : 34,
             opacity: 0,
             stagger: 0.12,
-            duration: isMobile ? 0.85 : 1.0,
+            duration: isMobile ? 0.8 : 1.0,
             ease: 'power3.out',
             clearProps: 'transform',
           });
         }
 
-        // 3A. Mobile (<768px) intro cup animation (always active on mobile with smooth 3D rotation, scale & frame scrub)
-        if (isMobile && mobileIntroCup && introEl) {
-          gsap.fromTo(
-            mobileIntroCup,
-            { opacity: 0, y: 20, scale: 0.92, transformPerspective: 850 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.95, ease: 'power3.out', delay: 0.1 }
-          );
+        // 3. Single Persistent Vessel Master Timeline Across Entire <main> (trigger: "main", scrub: 1)
+        if (mainEl && mover && inner && overlay) {
+          const desktopLeftX = () => {
+            const vw = window.innerWidth;
+            if (vw < 992) return -Math.round(vw * 0.25);
+            if (vw < 1200) return -Math.round(vw * 0.245);
+            return -Math.min(Math.round(vw * 0.235), 320);
+          };
 
-          ScrollTrigger.create({
-            trigger: introEl,
-            start: 'top top',
-            end: '+=150%',
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              const p = self.progress;
-              mobileIntroFrameRef.current = 1 + p * 18;
-              gsap.set(mobileIntroCup, {
-                y: -p * 24,
-                x: Math.sin(p * Math.PI) * 14,
-                rotation: Math.sin(p * Math.PI) * 3.5,
-                rotateY: Math.sin(p * Math.PI * 1.5) * 12,
-                scale: 0.95 + Math.sin(p * Math.PI) * 0.08,
-                transformPerspective: 850,
-              });
-            },
-          });
-        }
+          const frameState = { frame: 1 };
+          globalFrameRef.current = 1;
 
-        // 3B. Tablet/Desktop (>=768px) Fixed Choreographed Vessel Motion (Completely unchanged desktop experience)
-        if (!isMobile && mover && inner && overlay && introEl) {
-          gsap.set(mover, { x: 0, y: 42, scale: 1.0, opacity: 1 });
-          gsap.set(inner, { x: 0, rotation: 0, scale: 1 });
           gsap.set(overlay, { opacity: 1, y: 0 });
+          gsap.set(mover, {
+            x: 0,
+            y: isMobile ? -8 : 42,
+            scale: isMobile ? 0.94 : 1.0,
+            opacity: isMobile ? 0.88 : 1,
+          });
+          gsap.set(inner, {
+            x: 0,
+            rotation: 0,
+            rotateY: 0,
+            scale: 1,
+            transformPerspective: isMobile ? 850 : 950,
+          });
 
-          // Tablet / Laptop / Desktop Intro -> Chapter 01 glides smoothly LEFT
-          gsap.to(mover, {
-            x: () => {
-              const vw = window.innerWidth;
-              if (vw < 992) return -Math.round(vw * 0.25);
-              if (vw < 1200) return -Math.round(vw * 0.245);
-              return -Math.min(Math.round(vw * 0.235), 320);
-            },
-            y: 0,
-            scale: () => (window.innerWidth < 992 ? 0.92 : 0.95),
-            ease: 'none',
+          const masterTl = gsap.timeline({
             scrollTrigger: {
-              trigger: introEl,
+              trigger: mainEl,
               start: 'top top',
-              end: 'bottom 20%',
-              scrub: 0.9,
+              end: 'bottom bottom',
+              scrub: 1,
               invalidateOnRefresh: true,
             },
           });
 
-          if (introTitleRef.current) {
-            gsap.to(introTitleRef.current, {
-              y: -50,
-              opacity: 0,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: introEl,
-                start: '12% top',
-                end: '75% top',
-                scrub: 0.75,
+          // Segment 0 -> 1: Intro -> Chapter 01 Entry (14% of total scroll)
+          if (introTitleRef.current && introEl) {
+            masterTl.to(
+              introTitleRef.current,
+              {
+                y: isMobile ? -28 : -50,
+                opacity: isMobile ? 0.2 : 0,
+                ease: 'none',
+                duration: 0.1,
               },
-            });
+              0.02
+            );
           }
 
-          // Intro subtle frame opening (1 -> 12) synced to scroll
-          ScrollTrigger.create({
-            trigger: introEl,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 0.6,
-            onUpdate: (self) => {
-              globalFrameRef.current = 1 + self.progress * 11;
-            },
-          });
+          masterTl
+            .to(
+              mover,
+              {
+                x: () => (isMobile ? 26 : desktopLeftX()),
+                y: () => (isMobile ? -Math.round(window.innerHeight * 0.14) : 0),
+                scale: () => (isMobile ? 0.8 : window.innerWidth < 992 ? 0.92 : 0.95),
+                opacity: isMobile ? 0.42 : 1,
+                ease: 'power1.inOut',
+                duration: 0.14,
+              },
+              0
+            )
+            .to(
+              frameState,
+              {
+                frame: 12,
+                ease: 'none',
+                duration: 0.14,
+                onUpdate: () => {
+                  globalFrameRef.current = frameState.frame;
+                },
+              },
+              0
+            );
 
-          // Continuous Chapter-by-Chapter Sway + Scale + Rotation + Frame Scrubbing
+          // Segments 1..4: Continuous Smooth Vessel Morph & 3D Movement Through Chapters 01..04 (4 * 20% = 80%)
+          const chapterTimelineCoords = isMobile
+            ? [
+                { mx: -24, my: -0.12, mScale: 0.84, r: 3.5, ry: 12, s: 1.04 },
+                { mx: 26, my: -0.14, mScale: 0.86, r: -3.2, ry: -14, s: 1.05 },
+                { mx: -22, my: -0.11, mScale: 0.84, r: 3.8, ry: 14, s: 1.04 },
+                { mx: 0, my: -0.12, mScale: 0.87, r: -2.4, ry: -10, s: 1.03 },
+              ]
+            : [
+                { ix: 0, r: 2.2, ry: 6, s: 1.032 },
+                { ix: -10, r: -2.4, ry: -7, s: 1.035 },
+                { ix: 8, r: 2.5, ry: 8, s: 1.04 },
+                { ix: 0, r: -1.8, ry: -5, s: 1.025 },
+              ];
+
           FILM_CHAPTERS.forEach((chapter, idx) => {
-            const chapterEl = chapterRefs.current[idx];
-            if (!chapterEl) return;
+            const segStart = 0.14 + idx * 0.2;
+            const halfDur = 0.1;
+            const targetEndFrame = chapter.endFrame;
+            const pose = chapterTimelineCoords[idx] || chapterTimelineCoords[0];
 
-            const baseStart =
-              idx === 0 ? Math.max(12, chapter.startFrame) : chapter.startFrame;
-
-            ScrollTrigger.create({
-              trigger: chapterEl,
-              start: 'top 65%',
-              end: 'bottom 45%',
-              scrub: 0.75,
-              invalidateOnRefresh: true,
-              onUpdate: (self) => {
-                const p = self.progress;
-                globalFrameRef.current = baseStart + p * (chapter.endFrame - baseStart);
-
-                const angle = Math.sin(p * Math.PI * 1.5) * 2.2;
-                const pulse = 1 + Math.sin(p * Math.PI) * 0.032;
-
-                gsap.set(inner, {
-                  x: 0,
-                  rotation: angle,
-                  scale: pulse,
-                });
+            // Morph video frames seamlessly across chapter progress
+            masterTl.to(
+              frameState,
+              {
+                frame: targetEndFrame,
+                ease: 'none',
+                duration: 0.2,
+                onUpdate: () => {
+                  globalFrameRef.current = frameState.frame;
+                },
               },
-            });
+              segStart
+            );
+
+            if (isMobile) {
+              masterTl
+                .to(
+                  mover,
+                  {
+                    x: pose.mx,
+                    y: () => Math.round(window.innerHeight * pose.my),
+                    scale: pose.mScale,
+                    opacity: 0.45,
+                    ease: 'sine.inOut',
+                    duration: halfDur,
+                  },
+                  segStart
+                )
+                .to(
+                  inner,
+                  {
+                    rotation: pose.r,
+                    rotateY: pose.ry,
+                    scale: pose.s,
+                    ease: 'sine.inOut',
+                    duration: halfDur,
+                  },
+                  segStart
+                )
+                .to(
+                  inner,
+                  {
+                    rotation: -pose.r * 0.65,
+                    rotateY: -pose.ry * 0.7,
+                    scale: 0.99,
+                    ease: 'sine.inOut',
+                    duration: halfDur,
+                  },
+                  segStart + halfDur
+                );
+            } else {
+              masterTl
+                .to(
+                  inner,
+                  {
+                    x: pose.ix,
+                    rotation: pose.r,
+                    rotateY: pose.ry,
+                    scale: pose.s,
+                    ease: 'sine.inOut',
+                    duration: halfDur,
+                  },
+                  segStart
+                )
+                .to(
+                  inner,
+                  {
+                    x: 0,
+                    rotation: idx === FILM_CHAPTERS.length - 1 ? 0 : -pose.r * 0.7,
+                    rotateY: idx === FILM_CHAPTERS.length - 1 ? 0 : -pose.ry * 0.65,
+                    scale: 1,
+                    ease: 'sine.inOut',
+                    duration: halfDur,
+                  },
+                  segStart + halfDur
+                );
+            }
           });
 
-          // Outro Epilogue fade out before Footer on Tablet/Desktop
-          if (epilogueRef.current) {
-            gsap.to(overlay, {
+          // Segment 5: Quiet Epilogue Fade Out (final 6%)
+          masterTl.to(
+            overlay,
+            {
               opacity: 0,
-              y: -55,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: epilogueRef.current,
-                start: 'top 92%',
-                end: 'top 45%',
-                scrub: 0.75,
-              },
-            });
-          }
+              y: isMobile ? -36 : -55,
+              ease: 'power1.out',
+              duration: 0.06,
+            },
+            0.94
+          );
         }
 
-        // 4. Full Same Storytelling Text Reveals Across Mobile & Desktop
+        // 4. Staggered Typography & Control Reveals Across Mobile & Desktop
         FILM_CHAPTERS.forEach((_, idx) => {
           const chapterEl = chapterRefs.current[idx];
           if (!chapterEl) return;
@@ -731,18 +708,18 @@ export const MenuPage = () => {
       ref={pageRef}
       className="relative bg-[#101010] text-white overflow-x-clip pb-28 sm:pb-32 md:pb-0 selection:bg-[#F5C518] selection:text-[#101010]"
     >
-      {/* TABLET & DESKTOP (>=768px) FIXED CHOREOGRAPHED VESSEL STAGE (z-0 pointer-events-none strictly behind typography) */}
+      {/* SINGLE GLOBAL PERSISTENT VIEWPORT STAGE (ONLY ONE canvas across the entire Menu Page, fixed z-0 behind z-10/z-20 typography) */}
       <div
         ref={stageOverlayRef}
-        className="hidden md:flex motion-reduce:hidden fixed inset-0 pointer-events-none z-0 items-center justify-center"
+        className="fixed inset-0 w-full h-full pointer-events-none z-0 flex items-center justify-center"
         aria-hidden="true"
       >
-        <div ref={cupMoverRef} className="will-change-transform">
-          <div ref={cupInnerRef} className="will-change-transform">
+        <div ref={cupMoverRef} className="will-change-transform pointer-events-none">
+          <div ref={cupInnerRef} className="will-change-transform pointer-events-none">
             <ScrollCoffeeStage
               frameNumberRef={globalFrameRef}
               fallbackFrame={1}
-              className="md:w-[37vw] md:max-w-[310px] lg:w-[40vw] lg:max-w-[465px] xl:w-[42vw] xl:max-w-[565px]"
+              className="w-[min(76vw,38dvh)] h-[min(76vw,38dvh)] min-h-[210px] max-w-[290px] max-h-[300px] md:w-[37vw] md:h-auto md:min-h-0 md:max-w-[310px] md:max-h-none lg:w-[40vw] lg:max-w-[465px] xl:w-[42vw] xl:max-w-[565px]"
             />
           </div>
         </div>
@@ -767,28 +744,6 @@ export const MenuPage = () => {
               COFFEE<span className="text-[#F5C518]">.</span>
             </span>
           </h1>
-        </div>
-
-        {/* Mobile (<768px) Background Vessel Layer (strictly inset-0 z-0 pointer-events-none behind typography) */}
-        <div
-          aria-hidden="true"
-          className="md:hidden absolute inset-0 z-0 pointer-events-none flex items-center justify-center px-4"
-        >
-          <div ref={mobileIntroCupRef} className="will-change-transform pointer-events-none">
-            <ScrollCoffeeStage
-              frameNumberRef={mobileIntroFrameRef}
-              fallbackFrame={1}
-              className="w-[min(78vw,38dvh)] h-[min(78vw,38dvh)] min-h-[220px] max-w-[300px] max-h-[310px] mx-auto"
-            />
-          </div>
-        </div>
-
-        {/* Tablet/Desktop reduced-motion fallback static hero cup only */}
-        <div className="hidden md:motion-reduce:block relative z-0 pointer-events-none my-auto py-4 w-full">
-          <ScrollCoffeeStage
-            fallbackFrame={1}
-            className="md:max-w-[465px] mx-auto"
-          />
         </div>
 
         {/* Bottom quick jump chapter bar + subtle scroll whisper (explicitly z-20 pointer-events-auto on top) */}
