@@ -433,11 +433,12 @@ export const MenuPage = () => {
           const fadeDur = Math.max(0.05, 1 - epilogueFrac);
 
           const masterTl = gsap.timeline({
+            defaults: { ease: 'none' },
             scrollTrigger: {
               trigger: '#main-wrapper',
               start: 'top top',
               end: () => 'bottom bottom',
-              scrub: 1.5,
+              scrub: 1.8,
               invalidateOnRefresh: true,
             },
           });
@@ -464,7 +465,7 @@ export const MenuPage = () => {
                 y: () => (isMobile ? -Math.round(window.innerHeight * 0.14) : 0),
                 scale: () => (isMobile ? 0.8 : window.innerWidth < 992 ? 0.92 : 0.95),
                 opacity: isMobile ? 0.42 : 1,
-                ease: 'power1.inOut',
+                ease: 'none',
                 duration: firstChapterFrac,
               },
               0
@@ -526,7 +527,7 @@ export const MenuPage = () => {
                     y: () => Math.round(window.innerHeight * pose.my),
                     scale: pose.mScale,
                     opacity: 0.45,
-                    ease: 'sine.inOut',
+                    ease: 'none',
                     duration: halfDur,
                   },
                   segStart
@@ -537,7 +538,7 @@ export const MenuPage = () => {
                     rotation: pose.r,
                     rotateY: pose.ry,
                     scale: pose.s,
-                    ease: 'sine.inOut',
+                    ease: 'none',
                     duration: halfDur,
                   },
                   segStart
@@ -548,7 +549,7 @@ export const MenuPage = () => {
                     rotation: -pose.r * 0.65,
                     rotateY: -pose.ry * 0.7,
                     scale: 0.99,
-                    ease: 'sine.inOut',
+                    ease: 'none',
                     duration: halfDur,
                   },
                   segStart + halfDur
@@ -562,7 +563,7 @@ export const MenuPage = () => {
                     rotation: pose.r,
                     rotateY: pose.ry,
                     scale: pose.s,
-                    ease: 'sine.inOut',
+                    ease: 'none',
                     duration: halfDur,
                   },
                   segStart
@@ -574,7 +575,7 @@ export const MenuPage = () => {
                     rotation: idx === sectionCount - 1 ? pose.r * 0.35 : -pose.r * 0.7,
                     rotateY: idx === sectionCount - 1 ? pose.ry * 0.35 : -pose.ry * 0.65,
                     scale: 1,
-                    ease: 'sine.inOut',
+                    ease: 'none',
                     duration: halfDur,
                   },
                   segStart + halfDur
@@ -588,7 +589,7 @@ export const MenuPage = () => {
             {
               opacity: 0,
               y: isMobile ? -36 : -55,
-              ease: 'power1.out',
+              ease: 'none',
               duration: fadeDur,
             },
             epilogueFrac

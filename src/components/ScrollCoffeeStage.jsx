@@ -136,9 +136,19 @@ export const ScrollCoffeeStage = ({
     );
     observer.observe(container);
 
+    let layoutSize = {
+      width: container.clientWidth,
+      height: container.clientHeight,
+    };
+
     const resizeObserver =
       typeof ResizeObserver !== 'undefined'
-        ? new ResizeObserver(() => {
+        ? new ResizeObserver((entries) => {
+            const box = entries[0]?.contentRect;
+            layoutSize = {
+              width: box ? box.width : container.clientWidth,
+              height: box ? box.height : container.clientHeight,
+            };
             lastDrawnUrlRef.current = '';
           })
         : null;
@@ -181,8 +191,9 @@ export const ScrollCoffeeStage = ({
       rafId = requestAnimationFrame(drawLoop);
       if (!isVisible) return;
 
-      const rect = container.getBoundingClientRect();
-      if (rect.width < 2 || rect.height < 2) return;
+      const cssW = layoutSize.width || container.clientWidth;
+      const cssH = layoutSize.height || container.clientHeight;
+      if (cssW < 2 || cssH < 2) return;
 
       const rawBase = frameNumberRef?.current ?? fallbackFrame;
       const rawTarget = rawBase + dragFrameOffsetRef.current;
@@ -194,8 +205,8 @@ export const ScrollCoffeeStage = ({
       if (!resolved) return;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const targetW = Math.round(rect.width * dpr);
-      const targetH = Math.round(rect.height * dpr);
+      const targetW = Math.round(cssW * dpr);
+      const targetH = Math.round(cssH * dpr);
 
       const sizeChanged =
         lastCanvasSizeRef.current.width !== targetW ||
